@@ -1,0 +1,31 @@
+/* Adiciona animações CSS para o navbar*/
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Aplica a animação fadeIn ao cabeçalho */
+.header-fade-in {
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* Define a animação de entrada de cima para baixo */
+@keyframes slide-in-from-top {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Aplica a animação à classe slide-in */
+.slide-in {
+    animation: slide-in-from-top 1s ease-out;
+}

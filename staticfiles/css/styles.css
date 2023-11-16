@@ -1,0 +1,6 @@
+*{
+    overflow: hidden; /* hidden -> O conteúdo é cortado e nenhuma barra de rolagem é exibida. */
+    margin: 0;
+    padding: 0; 
+    background-image: radial-gradient(circle at 56.21% 54.35%, #00093d 0, #00063c 16.67%, #00033a 33.33%, #010038 50%, #0e0035 66.67%, #170032 83.33%, #1e002f 100%);
+}
