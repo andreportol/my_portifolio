@@ -1,6 +1,31 @@
-*{
-    overflow: hidden; /* hidden -> O conteúdo é cortado e nenhuma barra de rolagem é exibida. */
-    margin: 0;
-    padding: 0; 
-    background-image: radial-gradient(circle at 56.21% 54.35%, #00093d 0, #00063c 16.67%, #00033a 33.33%, #010038 50%, #0e0035 66.67%, #170032 83.33%, #1e002f 100%);
+/* Adiciona animações CSS para o navbar*/
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Aplica a animação fadeIn ao cabeçalho */
+.header-fade-in {
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* Define a animação de entrada de cima para baixo */
+@keyframes slide-in-from-top {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Aplica a animação à classe slide-in */
+.slide-in {
+    animation: slide-in-from-top 1s ease-out;
 }
