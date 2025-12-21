@@ -1,292 +1,109 @@
+{% extends "base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="pt-br">
 
-<head>
-    <title>Projetos</title>
+{% block title %}Projetos | André Luzardo Porto{% endblock %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
-    <style>
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <header>
-        <div class="navbar navbar-dark bg-dark shadow-sm">
-            <div class="container">
-                <a href="{% url 'core:index' %}" class="navbar-brand d-flex align-items-center border rounded p-2">
-                    <img class="mx-2" src="{% static 'img/projeto-80-branco.png' %}" alt="project" width="30px">
-                    <strong>Projetos</strong>
-                </a>
-            </div>
+{% block content %}
+    <section class="hero hero-small">
+        <p class="eyebrow">Projetos & entregas</p>
+        <h1 class="hero-title">Aplicações web, APIs e automações com Python, Django e IA.</h1>
+        <p class="hero-lead">
+            Seleção de projetos recentes que combinam back-end sólido, integrações com IA e deploy pronto no Railway. Sempre documentados, com testes básicos e focados em experiência do usuário.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+            <a href="https://github.com/andreportol?tab=repositories" class="btn-cta" target="_blank" rel="noopener noreferrer">Ver repositórios</a>
+            <a href="{% url 'core:contato' %}" class="btn-ghost">Precisa de algo parecido?</a>
         </div>
-    </header>
+    </section>
 
-    <main>
-
-        <section class="py-5 text-center container">
-            <div class="row py-lg-5">
-                <div class="col-lg-6 col-md-8 mx-auto">
-                    <h1 class="fw-light">Álbum dos projetos</h1>
-                    <p class="lead text-muted">Logo abaixo segue uma demostração de alguns dos projetos que foram elaborados por mim.
-                        A grande maioria desses projetos estão no repositório do GitHub para download.
-                    </p>
-                    <p class="lead text-muted">
-                        <a href="https://github.com/andreportol?tab=repositories" class="text-white"><img src="{% static 'img/github-48.png' %}" alt="github" title="Clique-me"></a> 
-                    </p>
+    <section class="row g-3">
+        <div class="col-md-6">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <video width="100%" height="280" controls poster="{% static 'img/projeto-80-branco.png' %}">
+                        <source src="{% static 'img/video.mp4' %}" type="video/mp4">
+                        Seu navegador não suporta o elemento de vídeo.
+                    </video>
                 </div>
-            </div>
-        </section>
-
-        <div class="album py-5 bg-light">
-            <div class="container">
-
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <video width="100%" height="225" controls>
-                                <source src="{% static 'img/video.mp4' %}" type="video/mp4">
-                                Seu navegador não suporta o elemento de vídeo.
-                            </video>                          
-                            
-                            <div class="card-body">
-                                <p class="card-text">Este projeto foi desenvolvido para Coordenadoria de Gestão de Áreas Públicas-CGAP do município de Campo Grande-MS. Consiste em controlar
-                                    o andamento da documentação, os prazos das notificações e dos autos de infração gerados após vistoria no local. Com esse aplicativa, é possível cadastrar
-                                    todos os infratores e controlar os laudos de vistoria elaborados pelos auditores fiscais de meio ambiente.                                     
-                                </p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <a href="https://www.youtube.com/@andreportol/videos" type="button" class="btn btn-sm btn-outline-primary">Ver mais</a>
-                                    </div>
-                                    <small class="text-muted">Não está no GitHub</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-                                    dy=".3em">Thumbnail</text>
-                            </svg>
-
-                            <div class="card-body">
-                                <p class="card-text">This is a wider card with supporting text below as a natural
-                                    lead-in to additional content. This content is a little bit longer.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                    </div>
-                                    <small class="text-muted">9 mins</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                    <h5>Gestão de Áreas Públicas</h5>
+                    <p>Workflow completo para CGAP: cadastro de infratores, laudos, prazos e notificações. Backend Django, PostgreSQL, relatórios e autenticação segura.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">Django + PostgreSQL</span>
+                    <span class="pill">Relatórios</span>
+                    <span class="pill">Deploy Railway</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="https://www.youtube.com/@andreportol/videos" class="btn-ghost" target="_blank" rel="noopener noreferrer">Ver demo</a>
+                    <small class="text-muted">Privado no GitHub</small>
                 </div>
             </div>
         </div>
-
-    </main>
-
-    <footer class="text-muted py-5">
-        <div class="container">
-            <p class="float-end mb-1">
-                <a href="#">Voltar ao topo</a>
-            </p>
-            <p class="mb-1">Obrigado pela visita, e sinta-se à vontade para me contactar.</p>
-            <p class="mb-0">Para contato!<a href="{% url 'core:contato' %}"> Clique aqui</a></p>
+        <div class="col-md-6">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <img src="{% static 'img/projeto-80-branco.png' %}" alt="Projeto API" class="w-100" style="height:280px; object-fit:cover; background: #0f172a;">
+                </div>
+                <div>
+                    <h5>API de automação com IA</h5>
+                    <p>Serviço REST com Django/DRF que orquestra modelos LLM para sumarização e classificação, com fila assíncrona e monitoramento básico.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">DRF</span>
+                    <span class="pill">LLM</span>
+                    <span class="pill">Docker</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="https://github.com/andreportol" class="btn-ghost" target="_blank" rel="noopener noreferrer">Código no GitHub</a>
+                    <small class="text-muted">Em produção</small>
+                </div>
+            </div>
         </div>
-    </footer>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-
-
-</body>
-
-</html>
+        <div class="col-md-4">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <img src="{% static 'img/projeto-80-branco.png' %}" alt="Painel" class="w-100" style="height:200px; object-fit:cover; background: #0f172a;">
+                </div>
+                <div>
+                    <h5>Painel de métricas</h5>
+                    <p>Dashboard em tempo real com Django + HTMX para acompanhar operações e alertas.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">HTMX</span>
+                    <span class="pill">PostgreSQL</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <img src="{% static 'img/projeto-80-branco.png' %}" alt="Geodjango" class="w-100" style="height:200px; object-fit:cover; background: #0f172a;">
+                </div>
+                <div>
+                    <h5>Mapas e GeoDjango</h5>
+                    <p>Visualização geográfica com Leaflet e GeoDjango para áreas públicas e relatórios.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">GeoDjango</span>
+                    <span class="pill">Leaflet</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <img src="{% static 'img/projeto-80-branco.png' %}" alt="Automação" class="w-100" style="height:200px; object-fit:cover; background: #0f172a;">
+                </div>
+                <div>
+                    <h5>Automação de rotinas</h5>
+                    <p>Jobs agendados com Python para importar dados, validar e publicar em APIs internas.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">Celery</span>
+                    <span class="pill">Integrações</span>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

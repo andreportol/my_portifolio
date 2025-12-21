@@ -1,55 +1,30 @@
+{% extends "base.html" %}
 {% load static %}
-<title>Continuação</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-	integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+{% block title %}Trajetória | André Luzardo Porto{% endblock %}
 
-<style>
-	.bd-placeholder-img {
-		font-size: 1.125rem;
-		text-anchor: middle;
-		-webkit-user-select: none;
-		-moz-user-select: none;
-		user-select: none;
-	}
+{% block content %}
+    <section class="hero hero-small">
+        <p class="eyebrow">Linha do tempo</p>
+        <h1 class="hero-title">Uma trajetória que conecta eletrônica, auditoria e software.</h1>
+    </section>
 
-	@media (min-width: 768px) {
-		.bd-placeholder-img-lg {
-			font-size: 3.5rem;
-		}
-	}
-</style>
-
-<!-- Custom styles for this template -->
-<link href="{% static 'css/cover.css' %}" rel="stylesheet">
-
-<body class="d-flex h-100 text-start text-white bg-dark">
-	<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-		<main class="px-3 text-center">
-			<h2 class="text-white"><i>Breve Descrição:</i></h2>
-			<p class="fs-6">Sou brasileiro, Nasci no estado do Rio Grande do Sul, na cidade de Pelotas-RS, e desde a
-				infância,
-				minha curiosidade me levava a desmontar meus carrinhos.</p>
-			<p class="fs-6">Em 1996, fui aprovado na antiga Escola Técnica Federal de Pelotas - ETFPEL, atualmente
-				conhecida como
-				IFSUL (Instituto Federal Sul-Rio-Grandense Campus Pelotas), onde cursei o técnico em eletrônica.</p>
-			<p class="fs-6">Em 2003, Fui aprovado na Escola de Especialista de Aeronaútica - EEAR, graduando-me como
-				Especialista em Eletrônica.</p>
-			<p class="fs-6">Em 2005, iniciei o curso de Engenharia Elétrica na Universidade para o Desenvolvimento do
-				Estado e da Região do Pantanal- UNIDERP, concluindo-o em 2009.</p>
-			<p class="fs-6">Em 2016, obtive aprovação como Auditor Fiscal de Meio Ambiente no munícipio de Campo
-				Grande-MS,
-				marcando uma transição significativa em minha trajetória.</p>
-			<p class="fs-6">Esse ano foi crucial em minha vida, pois deixei para trás a vida de concurseiro e decidi me
-				tornar um programador. Inicialmente, mergulhei no aprendizado de Java, desenvolvendo programas desktop e
-				automação com Raspberry PI.</p>
-			<p class="fs-6">Em 2022, Dei início à programação web, utilizando a linguagem Python em conjunto com o
-				framework Django.</p>
-			<p class="fs-6">Atualmente, minha atuação envolve o desenvolvimento de softwares, utilizando HTML, CSS,
-				Bootstrap e JavaScript no front-end, e Python com Django no back-end.</p>
-			<a class='btn btn-outline-light' href="{% url 'core:index' %}">Voltar</a>
-		</main>
-	</div>
-</body>
-
-</html>
+    <section class="timeline">
+        <div class="step">
+            <strong>Eletrônica</strong>
+            <p>Cursei eletrônica e aprendi a estruturar problemas técnicos com precisão.</p>
+        </div>
+        <div class="step">
+            <strong>Auditoria</strong>
+            <p>Como auditor, ganhei rigor em processos, evidências e documentação.</p>
+        </div>
+        <div class="step">
+            <strong>Software</strong>
+            <p>Migrei para desenvolvimento back-end com Python/Django, levando disciplina e foco em confiabilidade.</p>
+        </div>
+        <div class="step">
+            <strong>Hoje</strong>
+            <p>Entrego APIs, automações e integrações com IA aplicando práticas de clean code e testes.</p>
+        </div>
+    </section>
+{% endblock %}

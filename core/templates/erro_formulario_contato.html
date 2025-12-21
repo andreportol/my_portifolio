@@ -1,13 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <label for="">{{mensagem}}</label>
-    <label for="">Erro ao enviar o formulario</label>
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Erro ao enviar contato | André Luzardo Porto{% endblock %}
+
+{% block content %}
+    <section class="py-5">
+        <div class="col-lg-6 mx-auto">
+            <div class="glass-card text-center">
+                <div class="mb-3">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="12" r="11" stroke="#f87171" stroke-width="2"/>
+                        <path d="M9 9l6 6m0-6-6 6" stroke="#f87171" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 class="mb-2">Erro ao enviar o formulário</h2>
+                <p class="text-muted mb-3">{{ mensagem }}</p>
+                <p class="text-muted">Tente novamente em instantes. Se preferir, fale comigo por WhatsApp ou GitHub.</p>
+                <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+                    <a href="{% url 'core:contato' %}" class="btn-ghost">Voltar ao formulário</a>
+                    <a href="https://github.com/andreportol?tab=repositories" class="btn-ghost" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

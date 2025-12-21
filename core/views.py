@@ -18,7 +18,8 @@ class ProjetosTemplateView(TemplateView):
     template_name = 'projetos.html'
 
 def receber_email(request):
-    return render(request, 'contato.html')
+    form = ContatoForms()
+    return render(request, 'contato.html', {'form': form})
     
 def enviar_email(request):
     if request.method == 'POST':      
@@ -42,5 +43,6 @@ def enviar_email(request):
                     'message': 'Erro ao enviar o email. Por favor, tente novamente mais tarde.'
                 }
                 return render(request, 'erro_formulario_contato.html', mensagem)
-            
+        # Se não for válido, volta para o formulário exibindo erros
+        return render(request, 'contato.html', {'form': contatoform})
             
