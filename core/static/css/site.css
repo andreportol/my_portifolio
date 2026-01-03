@@ -438,7 +438,7 @@ a:hover {
     line-height: 1.55;
 }
 
-.project-card .pill {
+.project-card .pill:not(.pill-icon) {
     border-color: rgba(255, 255, 255, 0.14);
     background: rgba(255, 255, 255, 0.06);
     color: #e5edf7;
@@ -453,6 +453,53 @@ a:hover {
     background: var(--panel-strong);
     color: var(--muted);
     font-weight: 600;
+}
+
+.tech-pill,
+.pill-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.18), rgba(255, 255, 255, 0.04));
+    color: var(--accent);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+}
+
+.tech-pill.alt,
+.pill-icon.alt {
+    color: var(--accent-2);
+}
+
+.tech-icon,
+.pill-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.tech-icon .accent-2,
+.pill-icon svg .accent-2 {
+    stroke: var(--accent-2);
+}
+
+.tech-icon .fill {
+    fill: currentColor;
+}
+
+.tech-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.32));
 }
 
 .timeline {
