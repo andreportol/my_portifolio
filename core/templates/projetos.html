@@ -16,14 +16,13 @@
         </div>
     </section>
 
-    <section class="row g-3">
+    <section class="row g-3 row-cols-1 row-cols-md-2">
         <div class="col-md-6">
             <div class="project-card h-100">
                 <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                        
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
+                    <a href="https://www.youtube.com/watch?v=Epm26vg4MPg" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'img/alpfaturas.png' %}" alt="Thumbnail do projeto Langchain e Django" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
+                    </a>
                 </div>
                 <div>
                     <h5>Langchain e Django</h5>
@@ -36,21 +35,20 @@
                     <span class="pill">PostgreSQL</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="https://www.youtube.com/watch?v=Epm26vg4MPg" class="btn-ghost" target="_blank" rel="noopener noreferrer">Ver vídeo</a>
+                    <a href="https://www.youtube.com/watch?v=Epm26vg4MPg" class="btn-ghost btn-youtube" target="_blank" rel="noopener noreferrer">Ver vídeo no YouTube</a>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="project-card h-100">
                 <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                        
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
+                    <a href="https://youtu.be/U8554AlPTiE" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'img/entulhofacil.png' %}" alt="Thumbnail do Sistema Web para Gestão e Solicitação de Caçambas" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
+                    </a>
                 </div>
                 <div>
-                    <h5>Aplicativo para pedidos de caçambas</h5>
-                    <p>Aplicativo para solicitar caçambas de entulho com fluxo de aprovação, dashboard para a equipe acompanhar solicitações em tempo real.</p>
+                    <h5>Sistema Web para Gestão e Solicitação de Caçambas</h5>
+                    <p>Este software foi desenvolvido para agilizar e simplificar a solicitação de caçambas para a construção civil. Os transportadores cadastrados na plataforma recebem os pedidos diretamente em seu painel de controle. O cliente pode selecionar transportadores que atuam em sua região e visualizar imediatamente o valor da caçamba no momento da busca, tudo de forma rápida e prática pelo aplicativo.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <span class="pill">Python</span>
@@ -59,37 +57,38 @@
                     <span class="pill">CSS</span>
                     <span class="pill">Bootstrap</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-warning">Privado no GitHub</small>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <small class="text-warning mb-0">Privado no GitHub</small>
+                    <a href="https://youtu.be/U8554AlPTiE" class="btn-ghost btn-youtube" target="_blank" rel="noopener noreferrer">Ver vídeo no YouTube</a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="project-card h-100">
                 <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                       
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
+                    <a href="https://youtu.be/semades-demo" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'img/projeto_sisei.png' %}" alt="Thumbnail do painel integrado SISEI" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
+                    </a>
                 </div>
                 <div>
-                    <h5>Modelo de e-commerce</h5>
-                    <p>Template de e-commerce com catálogo, carrinho e checkout básico usando Django, Bootstrap e PostgreSQL.</p>
+                    <h5>Sistema de geoprocessamento</h5>
+                    <p>Portal administrativo com autenticação de usuários, permitindo consultas por inscrição imobiliária ou por proprietário. O sistema possibilita a visualização detalhada do imóvel, acompanhada de uma tabela com suas principais características. Conta ainda com dashboard para controle de produtividade, CRUD completo para inserção e gestão de processos, painéis de indicadores e automações voltadas às equipes de operações, com foco na redução de atividades manuais e na consolidação de dados críticos.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">Python</span>
                     <span class="pill">Django</span>
-                    <span class="pill">Bootstrap</span>
                     <span class="pill">PostgreSQL</span>
+                    <span class="pill">APIs</span>
                 </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="https://youtu.be/semades-demo" class="btn-ghost btn-youtube" target="_blank" rel="noopener noreferrer">Ver vídeo no YouTube</a>
+                </div> 
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="project-card h-100">
                 <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                        
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
+                    <img src="{% static 'img/semades.png' %}" alt="Thumbnail do projeto de Gestão de Áreas Públicas" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
                 </div>
                 <div>
                     <h5>Gestão de Áreas Públicas</h5>
@@ -105,55 +104,10 @@
                 </div>            
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="project-card h-100">
                <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                        
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
-                </div>
-                <div>
-                    <h5>API de automação de faturas elétricas com IA</h5>
-                    <p>API em Streamlit + LangChain que orquestra LLMs para sumarizar e classificar faturas, com fila síncrona e logs de auditoria.</p>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="pill">Streamlit</span>
-                    <span class="pill">LLM</span>
-                    <span class="pill">Langchain</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <a href="https://www.youtube.com/watch?v=be7E_3R8Uac" class="btn-ghost" target="_blank" rel="noopener noreferrer">Ver Vídeo</a>
-                </div> 
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="project-card h-100">
-                <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                        
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
-                </div>
-                <div>
-                    <h5>Projeto iniciado em 2023 usando técnicas de geoprocessamento</h5>
-                    <p>Prova de conceito de geoprocessamento com GeoServer, GeoDjango e PostGIS, incluindo mapas temáticos e geocodificação.</p>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="pill">Python</span>
-                    <span class="pill">GeoDjango</span>
-                    <span class="pill">Postgis</span>
-                    <span class="pill">GeoServer</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="project-card h-100">
-                <div class="project-thumb">
-                    <video class="lazy-video" width="100%" height="280" controls preload="none" playsinline poster="{% static 'img/projeto-80-branco.png' %}">
-                        
-                        Seu navegador não suporta o elemento de vídeo.
-                    </video>
+                    <img src="{% static 'img/projeto-80-branco.png' %}" alt="Thumbnail do Aplicativo para controle de estoque usando técnicas de IA" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
                 </div>
                 <div>
                     <h5>Aplicativo para controle de estoque usando técnicas de IA</h5>
@@ -168,37 +122,69 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6">
+            <div class="project-card h-100">
+               <div class="project-thumb">
+                    <a href="https://www.youtube.com/watch?v=be7E_3R8Uac" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'img/projetoboeira.png' %}" alt="Thumbnail da API de automação de faturas elétricas com IA" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
+                    </a>
+                </div>
+                <div>
+                    <h5>API de automação de faturas elétricas com IA</h5>
+                    <p>API em Streamlit + LangChain que orquestra LLMs para sumarizar e classificar faturas, com fila síncrona e logs de auditoria.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">Streamlit</span>
+                    <span class="pill">LLM</span>
+                    <span class="pill">Langchain</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="https://www.youtube.com/watch?v=be7E_3R8Uac" class="btn-ghost btn-youtube" target="_blank" rel="noopener noreferrer">Ver vídeo no YouTube</a>
+                </div> 
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <a href="https://youtu.be/HhSvcVWCDTQ" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'img/videoGeo.png' %}" alt="Thumbnail do projeto de geoprocessamento" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
+                    </a>
+                </div>
+                <div>
+                    <h5>Projeto iniciado em 2023 usando técnicas de geoprocessamento</h5>
+                    <p>Prova de conceito de geoprocessamento com GeoServer, GeoDjango e PostGIS, incluindo mapas temáticos e geocodificação.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">Python</span>
+                    <span class="pill">GeoDjango</span>
+                    <span class="pill">Postgis</span>
+                    <span class="pill">GeoServer</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="https://youtu.be/HhSvcVWCDTQ" class="btn-ghost btn-youtube" target="_blank" rel="noopener noreferrer">Ver vídeo no YouTube</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="project-card h-100">
+                <div class="project-thumb">
+                    <a href="https://youtu.be/6er2DNTlPts" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'img/ecommerce.png' %}" alt="Thumbnail do Modelo de e-commerce" class="img-fluid w-100" style="height: 280px; object-fit: cover;">
+                    </a>
+                </div>
+                <div>
+                    <h5>Modelo de e-commerce</h5>
+                    <p>Site de e-commerce desenvolvido para simular uma farmácia online, contando com catálogo de produtos, carrinho de compras e checkout básico. A aplicação permite adicionar e remover itens do carrinho e foi construída utilizando Django, Bootstrap e PostgreSQL.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pill">Django</span>
+                    <span class="pill">Bootstrap</span>
+                    <span class="pill">PostgreSQL</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="https://youtu.be/6er2DNTlPts" class="btn-ghost btn-youtube" target="_blank" rel="noopener noreferrer">Ver vídeo no YouTube</a>
+                </div> 
+            </div>
+        </div>
     </section>
-    <script>
-        // Carrega os vídeos apenas quando entram na área visível para melhorar a performance
-        document.addEventListener('DOMContentLoaded', function () {
-            const lazyVideos = document.querySelectorAll('video.lazy-video');
-            if (!lazyVideos.length) {
-                return;
-            }
-
-            const loadVideo = (video) => {
-                const sources = video.querySelectorAll('source[data-src]');
-                sources.forEach((source) => {
-                    source.src = source.dataset.src;
-                });
-                video.load();
-            };
-
-            if ('IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries, obs) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            loadVideo(entry.target);
-                            obs.unobserve(entry.target);
-                        }
-                    });
-                }, { rootMargin: '200px 0px' });
-
-                lazyVideos.forEach((video) => observer.observe(video));
-            } else {
-                lazyVideos.forEach(loadVideo);
-            }
-        });
-    </script>
 {% endblock %}
