@@ -475,6 +475,12 @@ a:hover {
     color: var(--accent-2);
 }
 
+.leaflet-pill {
+    width: 52px;
+    height: 52px;
+    padding: 10px;
+}
+
 .tech-icon,
 .pill-icon svg {
     width: 100%;
