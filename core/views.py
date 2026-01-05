@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.views.generic import TemplateView
@@ -31,11 +32,18 @@ def enviar_email(request):
             assunto = contatoform.cleaned_data['assunto']
 
             titulo = 'E-mail enviado através do portifólio.'
-            
+
             mensagem = f'Nome: {nome}\nTelefone: {telefone}\nE-mail: {email}\nAssunto: {assunto}'
             
             try:
-                send_mail(subject=titulo, message=mensagem, from_email=email, recipient_list=['andreportol@gmail.com.br'], fail_silently=False)
+                send_mail(
+                    subject=titulo,
+                    message=mensagem,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.CONTACT_RECIPIENT_EMAIL],
+                    reply_to=[email],
+                    fail_silently=False
+                )
                 return render(request, 'contato_enviado.html')
             except Exception as e:
                 print(str(e))
