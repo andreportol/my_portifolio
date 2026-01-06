@@ -126,16 +126,23 @@ EMAIL_BACKEND = config(
     default='django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
 )
 
-RESEND_API_KEY = config('RESEND_API_KEY', default=None)
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '') or os.getenv('api_key', '')
+RESEND_FROM_EMAIL = os.getenv('EMAIL_FROM', 'onboarding@resend.dev')
+CONTACT_EMAIL = (
+    os.getenv('CONTACT_EMAIL')
+    or os.getenv('CONTACT_TO_EMAIL')
+    or os.getenv('CONTACT_RECIPIENT_EMAIL')
+    or 'contato@example.com'
+)
 
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.sendgrid.net')
+# SMTP settings kept for compatibility; contact form uses Resend API.
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', cast=int, default=587)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=True)
 EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool, default=False)
-
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@example.com')
-RESEND_FROM_EMAIL = config('RESEND_FROM_EMAIL', default=DEFAULT_FROM_EMAIL)
-CONTACT_RECIPIENT_EMAIL = config('CONTACT_RECIPIENT_EMAIL', default='andreportol@gmail.com.br')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=RESEND_FROM_EMAIL)
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
