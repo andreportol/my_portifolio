@@ -1,4 +1,5 @@
 import logging
+from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 
@@ -38,19 +39,19 @@ def enviar_email(request):
 
         try:
             enviar_email_contato(nome, telefone, email, assunto)
-            return render(request, 'contato_enviado.html')
+            messages.success(request, "E-mail enviado com sucesso.")
+            return redirect('core:contato')
         except ValueError as exc:
             logger.warning("Configuração de email ausente para envio de contato: %s", exc)
-            mensagem = {
-                'message': 'Erro de configuração no envio de e-mail. Por favor, tente novamente mais tarde.'
-            }
-            return render(request, 'erro_formulario_contato.html', mensagem)
+            messages.error(request, str(exc))
+            return redirect('core:contato')
         except Exception as exc:
             logger.exception("Erro ao enviar email de contato via Resend")
-            mensagem = {
-                'message': 'Erro ao enviar o email. Por favor, tente novamente mais tarde.'
-            }
-            return render(request, 'erro_formulario_contato.html', mensagem)
+            user_error = str(exc)
+            if len(user_error) > 200:
+                user_error = user_error[:200] + "..."
+            messages.error(request, f"Erro ao enviar o e-mail: {user_error}")
+            return redirect('core:contato')
 
     # Se não for válido, volta para o formulário exibindo erros
     return render(request, 'contato.html', {'form': contatoform})

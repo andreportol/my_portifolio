@@ -3,6 +3,8 @@
 
 {% block title %}Contato | André Luzardo Porto{% endblock %}
 
+{% block messages %}{% endblock %}
+
 {% block content %}
     <section class="hero hero-small">
         <p class="eyebrow">Contato</p>
@@ -14,24 +16,50 @@
     </section>
 
     <div class="glass-card">
-        <form method="post" novalidate>
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} mb-2" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form method="post" action="{% url 'core:enviar_email' %}" novalidate>
             {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ form.non_field_errors|striptags }}
+            </div>
+            {% endif %}
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="id_nome" class="form-label">Nome</label>
                     <input type="text" name="nome" id="id_nome" class="form-control" required maxlength="50" value="{{ form.nome.value|default:'' }}" placeholder="Seu nome completo" autofocus>
+                    {% if form.nome.errors %}
+                    <div class="text-danger small">{{ form.nome.errors|striptags }}</div>
+                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <label for="id_telefone" class="form-label">WhatsApp/Telefone</label>
                     <input type="tel" name="telefone" id="id_telefone" class="form-control" required maxlength="15" value="{{ form.telefone.value|default:'' }}" placeholder="(00) 00000-0000" inputmode="numeric" pattern="\(\d{2}\)\d{5}-\d{4}">
+                    {% if form.telefone.errors %}
+                    <div class="text-danger small">{{ form.telefone.errors|striptags }}</div>
+                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <label for="id_email" class="form-label">Email</label>
                     <input type="email" name="email" id="id_email" class="form-control" required maxlength="30" value="{{ form.email.value|default:'' }}" placeholder="voce@email.com">
+                    {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+                    {% endif %}
                 </div>
                 <div class="col-12">
                     <label for="id_assunto" class="form-label">Assunto</label>
                     <textarea name="assunto" id="id_assunto" class="form-control" rows="5" required maxlength="400" placeholder="Descreva o que precisa">{{ form.assunto.value|default:'' }}</textarea>
+                    {% if form.assunto.errors %}
+                    <div class="text-danger small">{{ form.assunto.errors|striptags }}</div>
+                    {% endif %}
                 </div>
                 <div class="col-12 d-flex flex-wrap gap-2 form-actions-mobile">
                     <button type="submit" class="btn-cta d-inline-flex align-items-center gap-2">
