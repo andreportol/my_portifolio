@@ -126,24 +126,15 @@ EMAIL_BACKEND = config(
     default='django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
 )
 
-TWILIO_ACCOUNT_SID = config('SID', default=None) or config('user', default=None)
-TWILIO_AUTH_TOKEN = config('Token', default=None) or config('password', default=None)
+RESEND_API_KEY = config('RESEND_API_KEY', default=None)
 
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.sendgrid.net')
 EMAIL_PORT = config('EMAIL_PORT', cast=int, default=587)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=True)
 EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool, default=False)
 
-EMAIL_HOST_USER = config(
-    'EMAIL_HOST_USER',
-    default='apikey' if TWILIO_AUTH_TOKEN else (TWILIO_ACCOUNT_SID or '')
-)
-EMAIL_HOST_PASSWORD = config(
-    'EMAIL_HOST_PASSWORD',
-    default=TWILIO_AUTH_TOKEN or ''
-)
-
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@example.com')
+RESEND_FROM_EMAIL = config('RESEND_FROM_EMAIL', default=DEFAULT_FROM_EMAIL)
 CONTACT_RECIPIENT_EMAIL = config('CONTACT_RECIPIENT_EMAIL', default='andreportol@gmail.com.br')
 
 

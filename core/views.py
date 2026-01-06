@@ -1,5 +1,5 @@
+import resend
 from django.conf import settings
-from django.core.mail import send_mail
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
@@ -33,17 +33,29 @@ def enviar_email(request):
 
             titulo = 'E-mail enviado através do portifólio.'
 
-            mensagem = f'Nome: {nome}\nTelefone: {telefone}\nE-mail: {email}\nAssunto: {assunto}'
-            
+            if not settings.RESEND_API_KEY:
+                mensagem = {
+                    'message': 'Erro de configuração no envio de e-mail. Por favor, tente novamente mais tarde.'
+                }
+                return render(request, 'erro_formulario_contato.html', mensagem)
+
+            corpo_html = (
+                f"<p>Nome: {nome}<br>"
+                f"Telefone: {telefone}<br>"
+                f"E-mail: {email}<br>"
+                f"Assunto: {assunto}</p>"
+            )
+
             try:
-                send_mail(
-                    subject=titulo,
-                    message=mensagem,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.CONTACT_RECIPIENT_EMAIL],
-                    reply_to=[email],
-                    fail_silently=False
-                )
+                resend.api_key = settings.RESEND_API_KEY
+                response = resend.Emails.send({
+                    "from": settings.RESEND_FROM_EMAIL,
+                    "to": ['andreportol@gmail.com'],
+                    "subject":'MY PORTIFOLIO',
+                    "html": "<strong>Email enviado com sucesso via Resend + Railway</strong>",
+                    "reply_to": [email],
+                })
+                print(response)
                 return render(request, 'contato_enviado.html')
             except Exception as e:
                 print(str(e))
