@@ -568,6 +568,32 @@ a:hover {
     color: var(--muted);
 }
 
+.legal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.legal-grid .step {
+    height: 100%;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.footer-links a {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.footer-links a:hover {
+    color: var(--accent);
+}
+
 .bio-photo {
     width: 160px;
     height: 160px;
@@ -664,6 +690,10 @@ footer {
 @media (max-width: 991px) {
     .hero {
         padding-top: 26px;
+    }
+
+    .legal-grid {
+        grid-template-columns: 1fr;
     }
 }
 

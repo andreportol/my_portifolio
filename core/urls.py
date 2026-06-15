@@ -1,8 +1,9 @@
 from django.urls import path
 
 from .views import (BiografiaContinuacaoTemplateView, BiografiaTemplateView,
-                    IndexTemplateView, ProjetosTemplateView, enviar_email,
-                    receber_email)
+                    IndexTemplateView, PoliticaPrivacidadeTemplateView,
+                    ProjetosTemplateView, TermosServicoTemplateView,
+                    enviar_email, receber_email)
 
 app_name = 'core'
 
@@ -11,6 +12,10 @@ urlpatterns = [
     path('biografia/', BiografiaTemplateView.as_view(), name='biografia'),
     path('continuacao_biografia/', BiografiaContinuacaoTemplateView.as_view(), name='biografia_continuacao'),
     path('projetos/', ProjetosTemplateView.as_view(), name='projetos'),
+    path('politica-de-privacidade', PoliticaPrivacidadeTemplateView.as_view()),
+    path('politica-de-privacidade/', PoliticaPrivacidadeTemplateView.as_view(), name='politica_privacidade'),
+    path('termos-de-servico', TermosServicoTemplateView.as_view()),
+    path('termos-de-servico/', TermosServicoTemplateView.as_view(), name='termos_servico'),
     path('contato/', receber_email, name='contato'),
     path('enviar_email/', enviar_email, name='enviar_email'),
 ]

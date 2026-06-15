@@ -22,6 +22,14 @@ class BiografiaContinuacaoTemplateView(TemplateView):
 class ProjetosTemplateView(TemplateView):
     template_name = 'projetos.html'
 
+
+class PoliticaPrivacidadeTemplateView(TemplateView):
+    template_name = 'politica_de_privacidade.html'
+
+
+class TermosServicoTemplateView(TemplateView):
+    template_name = 'termos_de_servico.html'
+
 def receber_email(request):
     form = ContatoForms()
     return render(request, 'contato.html', {'form': form})
