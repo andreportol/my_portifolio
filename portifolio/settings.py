@@ -125,14 +125,24 @@ EMAIL_BACKEND = config(
     'EMAIL_BACKEND',
     default='django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
 )
-
-RESEND_API_KEY = os.getenv('RESEND_API_KEY', '') or os.getenv('api_key', '')
-RESEND_FROM_EMAIL = os.getenv('EMAIL_FROM', 'onboarding@resend.dev')
-CONTACT_EMAIL = (
-    os.getenv('CONTACT_EMAIL')
-    or os.getenv('CONTACT_TO_EMAIL')
-    or os.getenv('CONTACT_RECIPIENT_EMAIL')
-    or 'contato@example.com'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+# Pode conter caracteres especiais; usamos os.environ para evitar parsing.
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
+DEFAULT_FROM_EMAIL = config(
+    'DEFAULT_FROM_EMAIL',
+    default=EMAIL_HOST_USER or 'no-reply@andreporto.up.railway.app',
+)
+PUBLIC_WEB_BASE_URL = config(
+    'PUBLIC_WEB_BASE_URL',
+    default='https://andreporto.up.railway.app',
+).strip().rstrip('/')
+CONTACT_EMAIL = config(
+    'CONTACT_EMAIL',
+    default=EMAIL_HOST_USER or DEFAULT_FROM_EMAIL or 'contato@example.com',
 )
 
 
