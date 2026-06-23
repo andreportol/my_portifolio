@@ -1,7 +1,8 @@
 import logging
 
-import resend
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import escape
 
 
 logger = logging.getLogger(__name__)
@@ -9,36 +10,44 @@ logger = logging.getLogger(__name__)
 
 def enviar_email_contato(nome: str, telefone: str, email: str, assunto: str):
     """
-    Envia e-mail de contato via Resend API com corpo contendo dados do formulário.
+    Envia e-mail de contato via SMTP configurado no Django.
     """
-    if not settings.RESEND_API_KEY:
-        raise ValueError("RESEND_API_KEY não configurada.")
+    subject = "contato realizado via meu portifolio"
+    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+    recipient_list = [settings.CONTACT_EMAIL or settings.EMAIL_HOST_USER]
 
-    resend.api_key = settings.RESEND_API_KEY
-
-    subject = "E-mail enviado através do portifólio."
+    corpo_texto = (
+        f"Nome: {nome}\n"
+        f"Telefone: {telefone}\n"
+        f"E-mail: {email}\n"
+        f"Assunto: {assunto}"
+    )
+    nome_html = escape(nome)
+    telefone_html = escape(telefone)
+    email_html = escape(email)
+    assunto_html = escape(assunto)
     corpo_html = (
-        f"<p><strong>Nome:</strong> {nome}<br>"
-        f"<strong>Telefone:</strong> {telefone}<br>"
-        f"<strong>E-mail:</strong> {email}<br>"
-        f"<strong>Assunto:</strong> {assunto}</p>"
+        f"<p><strong>Nome:</strong> {nome_html}<br>"
+        f"<strong>Telefone:</strong> {telefone_html}<br>"
+        f"<strong>E-mail:</strong> {email_html}<br>"
+        f"<strong>Assunto:</strong> {assunto_html}</p>"
     )
 
-    payload = {
-        "from": settings.RESEND_FROM_EMAIL or "onboarding@resend.dev",
-        "to": [settings.CONTACT_EMAIL],
-        "subject": subject,
-        "html": corpo_html,
-        "reply_to": email,
-    }
-
     try:
-        response = resend.Emails.send(payload)
+        message = EmailMultiAlternatives(
+            subject=subject,
+            body=corpo_texto,
+            from_email=from_email,
+            to=recipient_list,
+            reply_to=[email],
+        )
+        message.attach_alternative(corpo_html, "text/html")
+        response = message.send(fail_silently=False)
         logger.info(
-            "Contato enviado via Resend",
-            extra={"to": settings.CONTACT_EMAIL, "from": settings.RESEND_FROM_EMAIL},
+            "Contato enviado via SMTP",
+            extra={"to": recipient_list[0], "from": from_email},
         )
         return response
     except Exception:
-        logger.exception("Falha ao enviar email de contato via Resend")
+        logger.exception("Falha ao enviar email de contato via SMTP")
         raise

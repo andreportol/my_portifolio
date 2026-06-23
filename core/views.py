@@ -88,6 +88,13 @@ class LicencaGestaoSalaoBelezaTemplateView(ProtectedTemplateView):
         return render(request, self.template_name, context)
 
 
+class PoliticaPrivacidadeTemplateView(TemplateView):
+    template_name = 'politica_de_privacidade.html'
+
+
+class TermosServicoTemplateView(TemplateView):
+    template_name = 'termos_de_servico.html'
+
 def receber_email(request):
     form = ContatoForms()
     return render(request, 'contato.html', {'form': form})

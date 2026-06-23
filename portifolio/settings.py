@@ -37,6 +37,20 @@ def read_bool_env(name, default=False):
     return default
 
 
+def read_config(name, default=None, cast=None):
+    value = read_env(name, default)
+    if value is None or cast is None:
+        return value
+
+    if cast is bool:
+        return read_bool_env(name, default=bool(default))
+
+    try:
+        return cast(value)
+    except (TypeError, ValueError):
+        return default
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -165,13 +179,24 @@ EMAIL_BACKEND = read_env(
     'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend',
 )
 
-RESEND_API_KEY = read_env('RESEND_API_KEY', '') or read_env('api_key', '')
-RESEND_FROM_EMAIL = read_env('EMAIL_FROM', 'onboarding@resend.dev')
-CONTACT_EMAIL = (
-    read_env('CONTACT_EMAIL')
-    or read_env('CONTACT_TO_EMAIL')
-    or read_env('CONTACT_RECIPIENT_EMAIL')
-    or 'contato@example.com'
+EMAIL_HOST = read_config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = read_config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = read_config('EMAIL_HOST_USER', default='')
+# Pode conter caracteres especiais; usamos os.environ para evitar parsing.
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = read_config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_USE_SSL = read_config('EMAIL_USE_SSL', default=False, cast=bool)
+DEFAULT_FROM_EMAIL = read_config(
+    'DEFAULT_FROM_EMAIL',
+    default=EMAIL_HOST_USER or 'no-reply@andreporto.up.railway.app',
+)
+PUBLIC_WEB_BASE_URL = read_config(
+    'PUBLIC_WEB_BASE_URL',
+    default='https://andreporto.up.railway.app',
+).strip().rstrip('/')
+CONTACT_EMAIL = read_config(
+    'CONTACT_EMAIL',
+    default=EMAIL_HOST_USER or DEFAULT_FROM_EMAIL or 'contato@example.com',
 )
 
 
