@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Licenças | André Luzardo Porto{% endblock %}
+
+{% block content %}
+    <section class="hero hero-small d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div>
+            <p class="eyebrow">Painel</p>
+            <h1 class="hero-title">Licenças de software</h1>
+            <p class="hero-lead">Escolha o tipo de licença que deseja gerar.</p>
+        </div>
+        <a class="btn-ghost" href="{% url 'core:sair' %}">Sair</a>
+    </section>
+
+    <section class="row g-3">
+        <div class="col-md-6">
+            <a class="glass-card d-block h-100" href="{% url 'core:licenca_gestao_oficina' %}">
+                <h5 class="mb-2">Gerar Licença Software Gestão Oficina</h5>
+                <p class="text-muted mb-0">Acesse a geração da licença para o sistema Gestão Oficina.</p>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a class="glass-card d-block h-100" href="{% url 'core:licenca_gestao_salao_beleza' %}">
+                <h5 class="mb-2">Gera Licença Software Gestão Salão Beleza</h5>
+                <p class="text-muted mb-0">Acesse a geração da licença para o sistema Gestão Salão Beleza.</p>
+            </a>
+        </div>
+    </section>
+{% endblock %}

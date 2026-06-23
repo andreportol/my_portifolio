@@ -41,9 +41,28 @@ Portfólio em Django 4.2 com formulário de contato integrado ao provedor de e-m
 
 ## Executando localmente
 ```bash
-python manage.py runserver
+python manage.py runserver 8001
 ```
-Abra http://localhost:8000/ e teste o formulário em `/contato/`.
+Abra http://localhost:8001/ e teste o formulário em `/contato/`.
+
+Se a porta `8000` estiver ocupada por outro programa no Windows, use uma porta livre como `8001`.
+
+## Acesso
+- O link `Entrar` leva para `/entrar/`.
+- O login autentica por e-mail e senha.
+- Para testar localmente, crie um usuário Django com `python manage.py createsuperuser` e use o e-mail cadastrado para entrar.
+
+## Gerador de licença
+- O fluxo da página `/licencas/gestao-oficina/` usa o mesmo gerador do CLI `generate_license.py`.
+- Exemplo de uso:
+  ```bash
+  python generate_license.py --machine-id 5e517465b1c11bb1998e21e3cfd5355c0859fbb745fbb179310615bde15f7780 --customer "Andre"
+  ```
+- A saída segue o formato `GOF1.<payload base64url>.<assinatura>`.
+- O payload inclui `app`, `customer`, `issued_at` em UTC e `machine_id`.
+- Se você precisar compatibilidade com outro gerador, defina o mesmo `GESTAO_OFICINA_LICENSE_SECRET` no `.env`.
+- A verificação da chave confere `GOF1`, assinatura, `app == "GestaoOficina"` e `machine_id`.
+- A tela pede o `ID da máquina` e o nome do cliente e devolve o código gerado no campo abaixo.
 
 ## Envio de e-mail (Resend)
 - O formulário de contato usa o serviço em `core/services/email_service.py`, com HTML contendo Nome, Telefone, E-mail e Assunto.

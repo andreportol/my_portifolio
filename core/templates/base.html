@@ -12,7 +12,7 @@
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 {% block body_class %}{% endblock %}">
     <header class="nav-shell">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="brand-mark">
@@ -31,6 +31,7 @@
                     <a class="nav-link {% if current == 'projetos' %}active{% endif %}" href="{% url 'core:projetos' %}">Projetos</a>
                     <a class="nav-link {% if current == 'biografia' or current == 'biografia_continuacao' %}active{% endif %}" href="{% url 'core:biografia' %}">Sobre</a>
                     <a class="nav-link {% if current == 'contato' %}active{% endif %}" href="{% url 'core:contato' %}">Contato</a>
+                    <a class="nav-link {% if current == 'entrar' or current == 'licencas' or current == 'licenca_gestao_oficina' or current == 'licenca_gestao_salao_beleza' %}active{% endif %}" href="{% url 'core:entrar' %}">Entrar</a>
                     {% endwith %}
                 </nav>
             </div>

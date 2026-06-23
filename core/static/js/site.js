@@ -53,4 +53,58 @@ document.addEventListener('DOMContentLoaded', () => {
         phoneInput.addEventListener('input', applyMask);
         phoneInput.addEventListener('blur', applyMask);
     }
+
+    const selectButton = document.querySelector('[data-select-license]');
+    if (selectButton) {
+        const targetId = selectButton.dataset.selectTarget;
+        const target = targetId ? document.getElementById(targetId) : null;
+
+        selectButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            if (!target || !target.value.trim()) {
+                return;
+            }
+
+            target.focus({ preventScroll: true });
+            if (typeof target.setSelectionRange === 'function') {
+                target.setSelectionRange(0, target.value.length);
+            }
+            target.select();
+        });
+    }
+
+    const copyButton = document.querySelector('[data-copy-license]');
+    if (copyButton) {
+        const targetId = copyButton.dataset.copyTarget;
+        const target = targetId ? document.getElementById(targetId) : null;
+
+        const setButtonLabel = (label) => {
+            copyButton.textContent = label;
+        };
+
+        copyButton.addEventListener('click', async () => {
+            if (!target || !target.value.trim()) {
+                setButtonLabel('Nada para copiar');
+                window.setTimeout(() => setButtonLabel('Copiar'), 1200);
+                return;
+            }
+
+            const text = target.value.trim();
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    target.focus();
+                    target.select();
+                    document.execCommand('copy');
+                }
+
+                setButtonLabel('Copiado');
+                window.setTimeout(() => setButtonLabel('Copiar'), 1200);
+            } catch (_error) {
+                setButtonLabel('Falha ao copiar');
+                window.setTimeout(() => setButtonLabel('Copiar'), 1600);
+            }
+        });
+    }
 });

@@ -259,6 +259,80 @@ a:hover {
     backdrop-filter: blur(14px);
 }
 
+.login-page .page-shell {
+    max-width: none;
+    width: 100%;
+}
+
+.login-page .login-shell {
+    width: min(100%, 768px);
+    margin: 0 auto;
+}
+
+.login-page .login-hero {
+    text-align: left;
+    padding: 32px 40px 10px;
+    margin-bottom: 0;
+}
+
+.login-page .login-hero .hero-title,
+.login-page .login-hero .hero-lead {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.login-page .login-hero .eyebrow,
+.login-page .login-hero .hero-title {
+    text-align: left;
+}
+
+.login-page .login-hero .hero-title {
+    font-size: clamp(1.75rem, 2.1vw, 2.35rem);
+    line-height: 1.05;
+}
+
+.login-card {
+    width: 100%;
+    max-width: none;
+    padding: 32px 40px;
+    box-sizing: border-box;
+}
+
+.login-page .login-card {
+    display: block;
+    margin-top: 0;
+}
+
+.login-card form {
+    width: 100%;
+}
+
+.login-card .form-control {
+    width: 100%;
+    min-width: 0;
+}
+
+@media (max-width: 575.98px) {
+    .login-page .login-hero {
+        text-align: left;
+        padding: 16px 16px 14px;
+    }
+
+    .login-page .login-hero .eyebrow {
+        margin-bottom: 10px;
+    }
+
+    .login-page .login-hero .hero-title {
+        text-align: left;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .login-page .login-card {
+        margin-top: 10px;
+    }
+}
+
 .glass-card .text-muted {
     color: var(--text) !important;
 }
@@ -973,6 +1047,53 @@ footer {
         padding: 0 12px 80px;
     }
 
+    .login-page .login-shell {
+        width: 100%;
+    }
+
+    .login-page .login-hero {
+        padding: 12px 12px 12px;
+    }
+
+    .login-page .login-hero .eyebrow {
+        margin-bottom: 10px;
+    }
+
+    .login-page .login-hero .hero-title {
+        text-align: left;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .login-page .login-card {
+        padding: 18px 12px;
+        margin-top: 10px;
+    }
+
+    .login-page .login-card .mb-3 {
+        margin-bottom: 0.55rem !important;
+    }
+
+    .login-page .login-card .mb-4 {
+        margin-bottom: 0.7rem !important;
+    }
+
+    .login-page .login-card .form-label {
+        margin-bottom: 0.25rem;
+        font-size: 0.92rem;
+    }
+
+    .login-page .login-card .form-control {
+        padding: 0.45rem 0.65rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+    }
+
+    .login-page .login-card .btn-cta {
+        padding: 0.55rem 0.9rem;
+        font-size: 0.95rem;
+    }
+
     .hero-title {
         font-size: clamp(1.35rem, 6vw, 1.75rem);
     }
@@ -1001,6 +1122,42 @@ footer {
 }
 
 @media (max-width: 348px) {
+    .login-page .login-hero {
+        padding: 10px 10px 10px;
+    }
+
+    .login-page .login-hero .eyebrow {
+        margin-bottom: 10px;
+    }
+
+    .login-page .login-hero .hero-title {
+        text-align: left;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .login-page .login-card {
+        padding: 16px 10px;
+        margin-top: 10px;
+    }
+
+    .login-page .login-card .mb-3 {
+        margin-bottom: 0.45rem !important;
+    }
+
+    .login-page .login-card .mb-4 {
+        margin-bottom: 0.55rem !important;
+    }
+
+    .login-page .login-card .form-control {
+        padding: 0.4rem 0.55rem;
+        font-size: 0.92rem;
+    }
+
+    .login-page .login-card .btn-cta {
+        padding: 0.5rem 0.8rem;
+    }
+
     .btn-cta .cta-text-full {
         display: none;
     }

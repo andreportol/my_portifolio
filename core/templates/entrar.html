@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar | André Luzardo Porto{% endblock %}
+
+{% block body_class %}login-page{% endblock %}
+
+{% block content %}
+    <div class="login-shell">
+        <section class="hero hero-small login-hero">
+            <p class="eyebrow">Acesso restrito</p>
+            <h1 class="hero-title">Entrar</h1>
+        </section>
+
+        <div class="glass-card login-card">
+            <form method="post" novalidate>
+            {% csrf_token %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ form.non_field_errors|striptags }}
+                </div>
+            {% endif %}
+            <div class="mb-3">
+                <label for="{{ form.email.id_for_label }}" class="form-label">E-mail</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.senha.id_for_label }}" class="form-label">Senha</label>
+                {{ form.senha }}
+                {% if form.senha.errors %}
+                    <div class="text-danger small">{{ form.senha.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn-cta">Entrar</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

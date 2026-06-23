@@ -1,26 +1,56 @@
 import os
 from pathlib import Path
 
-from decouple import Csv, config
+from decouple import Config, Csv, RepositoryEnv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = Config(RepositoryEnv(str(BASE_DIR / '.env')))
+
+
+def read_env(name, default=None):
+    try:
+        value = ENV_FILE(name)
+    except Exception:
+        value = None
+
+    if value is None:
+        value = os.getenv(name)
+
+    if value is None:
+        return default
+
+    return value
+
+
+def read_bool_env(name, default=False):
+    raw_value = read_env(name)
+    if raw_value is None:
+        return default
+
+    normalized = str(raw_value).strip().lower()
+    if normalized in {'1', 'true', 't', 'yes', 'y', 'on'}:
+        return True
+    if normalized in {'0', 'false', 'f', 'no', 'n', 'off'}:
+        return False
+    return default
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = read_env('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('SECRET_KEY is not configured.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG',default=False, cast=bool)
+DEBUG = read_bool_env('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='https://andreporto.up.railway.app',
-    cast=Csv()
+CSRF_TRUSTED_ORIGINS = Csv()(
+    read_env('CSRF_TRUSTED_ORIGINS', 'https://andreporto.up.railway.app')
 )
 
 
@@ -36,6 +66,15 @@ INSTALLED_APPS = [
     # My app
     'core',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'core.auth_backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_URL = 'core:entrar'
+LOGIN_REDIRECT_URL = 'core:licencas'
+LOGOUT_REDIRECT_URL = 'core:index'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -121,17 +160,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-EMAIL_BACKEND = config(
+EMAIL_BACKEND = read_env(
     'EMAIL_BACKEND',
-    default='django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+    'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend',
 )
 
-RESEND_API_KEY = os.getenv('RESEND_API_KEY', '') or os.getenv('api_key', '')
-RESEND_FROM_EMAIL = os.getenv('EMAIL_FROM', 'onboarding@resend.dev')
+RESEND_API_KEY = read_env('RESEND_API_KEY', '') or read_env('api_key', '')
+RESEND_FROM_EMAIL = read_env('EMAIL_FROM', 'onboarding@resend.dev')
 CONTACT_EMAIL = (
-    os.getenv('CONTACT_EMAIL')
-    or os.getenv('CONTACT_TO_EMAIL')
-    or os.getenv('CONTACT_RECIPIENT_EMAIL')
+    read_env('CONTACT_EMAIL')
+    or read_env('CONTACT_TO_EMAIL')
+    or read_env('CONTACT_RECIPIENT_EMAIL')
     or 'contato@example.com'
 )
 
