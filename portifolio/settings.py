@@ -6,7 +6,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-ENV_FILE = Config(RepositoryEnv(str(BASE_DIR / '.env')))
+ENV_PATH = BASE_DIR / '.env'
+ENV_FILE = Config(RepositoryEnv(str(ENV_PATH))) if ENV_PATH.exists() else None
 
 
 def read_env(name, default=None):
