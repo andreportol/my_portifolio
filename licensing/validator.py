@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import json
+import unicodedata
 from datetime import datetime, timezone
 
 from . import APP_NAME, LICENSE_SECRET, TOKEN_PREFIX
@@ -20,7 +21,12 @@ def _normalize_customer(customer: str) -> str:
     value = (customer or "").strip()
     if not value:
         raise ValueError("customer nao pode ficar vazio.")
-    return value
+
+    # Remove acentos e normaliza espaços para gerar a mesma licença
+    # independentemente de o nome vir com ou sem diacríticos.
+    value = unicodedata.normalize("NFKD", value)
+    value = "".join(char for char in value if not unicodedata.combining(char))
+    return " ".join(value.split())
 
 
 def _b64url_encode(data: bytes) -> str:
