@@ -7,7 +7,7 @@ from . import APP_NAME, LICENSE_SECRET, TOKEN_PREFIX
 
 
 def _normalize_machine_id(machine_id: str) -> str:
-    value = (machine_id or "").strip().replace(" ", "").lower()
+    value = (machine_id or "").strip()
     if not value:
         raise ValueError("machine_id nao pode ficar vazio.")
     if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):

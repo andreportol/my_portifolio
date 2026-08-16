@@ -1,24 +1,38 @@
 import os
 from pathlib import Path
 
-from decouple import Config, RepositoryEnv
-
 
 APP_NAME = "GestaoOficina"
 TOKEN_PREFIX = "GOF1"
 BASE_DIR = Path(__file__).resolve().parent.parent
-ENV_FILE = Config(RepositoryEnv(str(BASE_DIR / ".env"))) if (BASE_DIR / ".env").exists() else None
+
+
+def _load_env_file(name: str, default: str | None = None) -> str | None:
+    env_path = BASE_DIR / ".env"
+    if env_path.exists():
+        try:
+            for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+                line = raw_line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("export "):
+                    line = line[7:].lstrip()
+                if "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                if key.strip() != name:
+                    continue
+                value = value.strip()
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+                    value = value[1:-1]
+                return value
+        except OSError:
+            pass
+    return os.getenv(name, default)
 
 
 def _read_env(name: str, default: str | None = None) -> str | None:
-    if ENV_FILE is not None:
-        try:
-            value = ENV_FILE(name)
-            if value is not None:
-                return value
-        except Exception:
-            pass
-    return os.getenv(name, default)
+    return _load_env_file(name, default)
 
 
 LICENSE_SECRET = (
