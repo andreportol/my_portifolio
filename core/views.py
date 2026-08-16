@@ -56,7 +56,6 @@ class LicencaGestaoOficinaTemplateView(ProtectedTemplateView):
             try:
                 codigo_gerado = gerar_codigo_licenca_gestao_oficina(
                     machine_id=form.cleaned_data['machine_id'],
-                    customer=form.cleaned_data['customer'],
                 )
             except ValueError as exc:
                 form.add_error(None, str(exc))
@@ -80,7 +79,6 @@ class LicencaGestaoSalaoBelezaTemplateView(ProtectedTemplateView):
             try:
                 codigo_gerado = gerar_codigo_licenca_gestao_salao_beleza(
                     machine_id=form.cleaned_data['machine_id'],
-                    customer=form.cleaned_data['customer'],
                 )
             except ValueError as exc:
                 form.add_error(None, str(exc))

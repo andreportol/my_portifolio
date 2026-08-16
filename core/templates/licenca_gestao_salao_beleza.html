@@ -6,7 +6,7 @@
     <section class="hero hero-small">
         <p class="eyebrow">Licenças</p>
         <h1 class="hero-title">Gerar licença do software Gestão Salão Beleza</h1>
-        <p class="hero-lead">Cole o ID da máquina, informe o cliente e gere a licença offline.</p>
+        <p class="hero-lead">Cole o ID da máquina e gere a licença offline.</p>
     </section>
 
     <div class="glass-card">
@@ -18,18 +18,11 @@
                 </div>
             {% endif %}
             <div class="row g-3">
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <label for="{{ form.machine_id.id_for_label }}" class="form-label">ID da máquina</label>
                     {{ form.machine_id }}
                     {% if form.machine_id.errors %}
                         <div class="text-danger small">{{ form.machine_id.errors|striptags }}</div>
-                    {% endif %}
-                </div>
-                <div class="col-lg-4">
-                    <label for="{{ form.customer.id_for_label }}" class="form-label">Cliente</label>
-                    {{ form.customer }}
-                    {% if form.customer.errors %}
-                        <div class="text-danger small">{{ form.customer.errors|striptags }}</div>
                     {% endif %}
                 </div>
             </div>

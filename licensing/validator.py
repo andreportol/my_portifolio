@@ -2,8 +2,6 @@ import base64
 import hashlib
 import hmac
 import json
-import unicodedata
-from datetime import datetime, timezone
 
 from . import APP_NAME, LICENSE_SECRET, TOKEN_PREFIX
 
@@ -17,18 +15,6 @@ def _normalize_machine_id(machine_id: str) -> str:
     return value
 
 
-def _normalize_customer(customer: str) -> str:
-    value = (customer or "").strip()
-    if not value:
-        raise ValueError("customer nao pode ficar vazio.")
-
-    # Remove acentos e normaliza espaços para gerar a mesma licença
-    # independentemente de o nome vir com ou sem diacríticos.
-    value = unicodedata.normalize("NFKD", value)
-    value = "".join(char for char in value if not unicodedata.combining(char))
-    return " ".join(value.split())
-
-
 def _b64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
 
@@ -38,16 +24,9 @@ def _b64url_decode(value: str) -> bytes:
     return base64.urlsafe_b64decode(value + padding)
 
 
-def _canonical_payload(machine_id: str, customer: str, issued_at: datetime | None = None) -> str:
-    issued_at_value = issued_at or datetime.now(timezone.utc)
-    if issued_at_value.tzinfo is None:
-        issued_at_value = issued_at_value.replace(tzinfo=timezone.utc)
-    issued_at_value = issued_at_value.astimezone(timezone.utc)
-
+def _canonical_payload(machine_id: str) -> str:
     payload = {
         "app": APP_NAME,
-        "customer": _normalize_customer(customer),
-        "issued_at": issued_at_value.isoformat(),
         "machine_id": _normalize_machine_id(machine_id),
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
@@ -64,10 +43,8 @@ def _sign(payload_base64url: str) -> str:
 
 def generate_license_key(
     machine_id: str,
-    customer: str,
-    issued_at: datetime | None = None,
 ) -> str:
-    payload_json = _canonical_payload(machine_id=machine_id, customer=customer, issued_at=issued_at)
+    payload_json = _canonical_payload(machine_id=machine_id)
     payload_base64url = _b64url_encode(payload_json.encode("utf-8"))
     signature_base64url = _sign(payload_base64url)
     return f"{TOKEN_PREFIX}.{payload_base64url}.{signature_base64url}"
@@ -96,3 +73,6 @@ def verify_license_key(license_key: str, machine_id: str) -> dict:
         raise ValueError("A licença não pertence a esta máquina.")
 
     return payload
+
+
+validate_license_key_for_machine = verify_license_key

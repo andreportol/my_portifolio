@@ -27,6 +27,7 @@ Portfólio em Django 4.2 com formulário de contato integrado ao provedor de e-m
    ```
    SECRET_KEY=change-me
    DEBUG=True
+   GESTAO_OFICINA_LICENSE_SECRET=change-me-too
    CSRF_TRUSTED_ORIGINS=https://example.up.railway.app
    RESEND_API_KEY=your_resend_api_key
    EMAIL_FROM=onboarding@resend.dev
@@ -56,13 +57,14 @@ Se a porta `8000` estiver ocupada por outro programa no Windows, use uma porta l
 - O fluxo da página `/licencas/gestao-oficina/` usa o mesmo gerador do CLI `generate_license.py`.
 - Exemplo de uso:
   ```bash
-  python generate_license.py --machine-id 5e517465b1c11bb1998e21e3cfd5355c0859fbb745fbb179310615bde15f7780 --customer "Andre"
+  python generate_license.py --machine-id 5e517465b1c11bb1998e21e3cfd5355c0859fbb745fbb179310615bde15f7780
   ```
 - A saída segue o formato `GOF1.<payload base64url>.<assinatura>`.
-- O payload inclui `app`, `customer`, `issued_at` em UTC e `machine_id`.
-- Se você precisar compatibilidade com outro gerador, defina o mesmo `GESTAO_OFICINA_LICENSE_SECRET` no `.env`.
+- O payload inclui `app` e `machine_id`.
+- O segredo de assinatura precisa ser o mesmo no CLI e na web: `GESTAO_OFICINA_LICENSE_SECRET`.
+- Se você precisar compatibilidade com outro gerador, defina o mesmo valor no `.env` em todos os ambientes.
 - A verificação da chave confere `GOF1`, assinatura, `app == "GestaoOficina"` e `machine_id`.
-- A tela pede o `ID da máquina` e o nome do cliente e devolve o código gerado no campo abaixo.
+- A tela pede só o `ID da máquina`.
 
 ## Envio de e-mail (Resend)
 - O formulário de contato usa o serviço em `core/services/email_service.py`, com HTML contendo Nome, Telefone, E-mail e Assunto.

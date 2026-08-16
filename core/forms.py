@@ -43,15 +43,4 @@ class LicencaGestaoOficinaForm(forms.Form):
             'spellcheck': 'false',
         }),
     )
-    customer = forms.CharField(
-        label='Cliente',
-        max_length=120,
-        required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Nome do cliente',
-            'autocomplete': 'off',
-            'spellcheck': 'false',
-        }),
-    )
 
