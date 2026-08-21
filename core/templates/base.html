@@ -31,7 +31,7 @@
                     <a class="nav-link {% if current == 'projetos' %}active{% endif %}" href="{% url 'core:projetos' %}">Projetos</a>
                     <a class="nav-link {% if current == 'biografia' or current == 'biografia_continuacao' %}active{% endif %}" href="{% url 'core:biografia' %}">Sobre</a>
                     <a class="nav-link {% if current == 'contato' %}active{% endif %}" href="{% url 'core:contato' %}">Contato</a>
-                    <a class="nav-link {% if current == 'entrar' or current == 'licencas' or current == 'licenca_gestao_oficina' or current == 'licenca_gestao_salao_beleza' %}active{% endif %}" href="{% url 'core:entrar' %}">Entrar</a>
+                    <a class="nav-link {% if current == 'entrar' or current == 'licencas' or current == 'licenca_softwares' or current == 'licenca_gestao_salao_beleza' %}active{% endif %}" href="{% url 'core:entrar' %}">Entrar</a>
                     {% endwith %}
                 </nav>
             </div>

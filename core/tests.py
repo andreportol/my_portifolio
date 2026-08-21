@@ -47,13 +47,13 @@ class LicenseGeneratorTests(TestCase):
 
         machine_id = "1cd90f24bf0dacb7b03fcba11781052c36b622269690a445771413fd592278b3"
         response_1 = self.client.post(
-            reverse("core:licenca_gestao_oficina"),
+            reverse("core:licenca_softwares"),
             {
                 "machine_id": machine_id,
             },
         )
         response_2 = self.client.post(
-            reverse("core:licenca_gestao_oficina"),
+            reverse("core:licenca_softwares"),
             {
                 "machine_id": machine_id,
             },

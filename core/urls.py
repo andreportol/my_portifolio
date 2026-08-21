@@ -1,10 +1,11 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from .views import (
     BiografiaContinuacaoTemplateView,
     BiografiaTemplateView,
     IndexTemplateView,
-    LicencaGestaoOficinaTemplateView,
+    LicencaSoftwaresTemplateView,
     LicencaGestaoSalaoBelezaTemplateView,
     LicencasTemplateView,
     PoliticaPrivacidadeTemplateView,
@@ -32,9 +33,13 @@ urlpatterns = [
     path('sair/', sair, name='sair'),
     path('licencas/', LicencasTemplateView.as_view(), name='licencas'),
     path(
+        'licencas/softwares/',
+        LicencaSoftwaresTemplateView.as_view(),
+        name='licenca_softwares',
+    ),
+    path(
         'licencas/gestao-oficina/',
-        LicencaGestaoOficinaTemplateView.as_view(),
-        name='licenca_gestao_oficina',
+        RedirectView.as_view(pattern_name='core:licenca_softwares', permanent=True),
     ),
     path(
         'licencas/gestao-salao-beleza/',

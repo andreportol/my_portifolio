@@ -259,6 +259,120 @@ a:hover {
     backdrop-filter: blur(14px);
 }
 
+.licencas-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.licencas-hero-copy {
+    max-width: 760px;
+}
+
+.licencas-hero-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-top: 4px;
+}
+
+.btn-ghost.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 14px;
+}
+
+.btn-ghost.btn-logout svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+}
+
+.licencas-card {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    border-radius: 22px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.licencas-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(34, 211, 238, 0.55);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    color: var(--text);
+}
+
+.licencas-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.14), transparent 42%),
+        linear-gradient(225deg, rgba(251, 191, 36, 0.08), transparent 38%);
+    pointer-events: none;
+}
+
+.licencas-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 20px 0;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(34, 211, 238, 0.12);
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.licencas-card-content {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 20px 20px;
+    min-height: 126px;
+}
+
+.licencas-card-title {
+    font-family: 'Space Grotesk', 'Manrope', sans-serif;
+    font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+    line-height: 1.12;
+    margin-bottom: 10px;
+}
+
+.licencas-card-description {
+    color: var(--muted);
+    max-width: 52ch;
+}
+
+.licencas-card-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text);
+    flex: 0 0 auto;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.licencas-card-arrow svg {
+    width: 20px;
+    height: 20px;
+}
+
 .login-page .page-shell {
     max-width: none;
     width: 100%;
@@ -766,6 +880,16 @@ footer {
         padding-top: 26px;
     }
 
+    .licencas-hero {
+        flex-direction: column;
+    }
+
+    .licencas-hero-actions {
+        width: 100%;
+        justify-content: flex-start;
+        padding-top: 0;
+    }
+
     .legal-grid {
         grid-template-columns: 1fr;
     }
@@ -830,6 +954,40 @@ footer {
         margin-left: auto;
         margin-right: auto;
         font-size: clamp(0.98rem, 4.2vw, 1.05rem);
+    }
+
+    .licencas-hero {
+        text-align: left;
+    }
+
+    .licencas-hero-copy {
+        width: 100%;
+    }
+
+    .licencas-hero-actions {
+        justify-content: center;
+    }
+
+    .btn-ghost.btn-logout {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .licencas-card-badge {
+        margin: 16px 16px 0;
+    }
+
+    .licencas-card-content {
+        flex-direction: column;
+        align-items: flex-start;
+        min-height: 0;
+        padding: 16px;
+    }
+
+    .licencas-card-arrow {
+        width: 44px;
+        height: 44px;
+        margin-top: 6px;
     }
 
     .d-flex.flex-wrap.gap-3 {

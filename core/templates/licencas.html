@@ -3,26 +3,40 @@
 {% block title %}Licenças | André Luzardo Porto{% endblock %}
 
 {% block content %}
-    <section class="hero hero-small d-flex flex-wrap justify-content-between align-items-start gap-3">
-        <div>
+    <section class="hero hero-small licencas-hero">
+        <div class="licencas-hero-copy">
             <p class="eyebrow">Painel</p>
-            <h1 class="hero-title">Licenças de software</h1>
-            <p class="hero-lead">Escolha o tipo de licença que deseja gerar.</p>
+            <h1 class="hero-title">Gerar Licença dos softwares</h1>
+            <p class="hero-lead">Acesse a geração da licença disponível neste painel.</p>
         </div>
-        <a class="btn-ghost" href="{% url 'core:sair' %}">Sair</a>
-    </section>
-
-    <section class="row g-3">
-        <div class="col-md-6">
-            <a class="glass-card d-block h-100" href="{% url 'core:licenca_gestao_oficina' %}">
-                <h5 class="mb-2">Gerar Licença Software Gestão Oficina</h5>
-                <p class="text-muted mb-0">Acesse a geração da licença para o sistema Gestão Oficina.</p>
+        <div class="licencas-hero-actions">
+            <a class="btn-ghost btn-logout" href="{% url 'core:sair' %}">
+                <span>Sair</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M10 17l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M21 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
             </a>
         </div>
-        <div class="col-md-6">
-            <a class="glass-card d-block h-100" href="{% url 'core:licenca_gestao_salao_beleza' %}">
-                <h5 class="mb-2">Gera Licença Software Gestão Salão Beleza</h5>
-                <p class="text-muted mb-0">Acesse a geração da licença para o sistema Gestão Salão Beleza.</p>
+    </section>
+
+    <section class="row justify-content-center">
+        <div class="col-12 col-lg-9 col-xl-8">
+            <a class="glass-card d-block licencas-card" href="{% url 'core:licenca_softwares' %}">
+                <div class="licencas-card-badge">Gerenciamento de licenças</div>
+                <div class="licencas-card-content">
+                    <div>
+                        <h2 class="licencas-card-title mb-2">Gerar Licença dos softwares</h2>
+                        <p class="licencas-card-description mb-0">Acesse a geração das licenças para os sistemas de gestão disponíveis.</p>
+                    </div>
+                    <span class="licencas-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M5 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </div>
             </a>
         </div>
     </section>

@@ -40,8 +40,8 @@ class LicencasTemplateView(ProtectedTemplateView):
     template_name = 'licencas.html'
 
 
-class LicencaGestaoOficinaTemplateView(ProtectedTemplateView):
-    template_name = 'licenca_gestao_oficina.html'
+class LicencaSoftwaresTemplateView(ProtectedTemplateView):
+    template_name = 'licenca_softwares.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
