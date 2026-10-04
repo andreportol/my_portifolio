@@ -5,9 +5,9 @@
 {% block content %}
     <section class="hero hero-small licencas-hero">
         <div class="licencas-hero-copy">
-            <p class="eyebrow">Painel</p>
-            <h1 class="hero-title">Gerar Licença dos softwares</h1>
-            <p class="hero-lead">Acesse a geração da licença disponível neste painel.</p>
+            <p class="eyebrow">Área reservada</p>
+            <h1 class="hero-title">Licenças dos softwares</h1>
+            <p class="hero-lead">Consulte os projetos disponíveis ou gere uma licença de forma simples e segura.</p>
         </div>
         <div class="licencas-hero-actions">
             <a class="btn-ghost btn-logout" href="{% url 'core:sair' %}">
@@ -21,23 +21,37 @@
         </div>
     </section>
 
-    <section class="row justify-content-center">
-        <div class="col-12 col-lg-9 col-xl-8">
-            <a class="glass-card d-block licencas-card" href="{% url 'core:licenca_softwares' %}">
-                <div class="licencas-card-badge">Gerenciamento de licenças</div>
-                <div class="licencas-card-content">
-                    <div>
-                        <h2 class="licencas-card-title mb-2">Gerar Licença dos softwares</h2>
-                        <p class="licencas-card-description mb-0">Acesse a geração das licenças para os sistemas de gestão disponíveis.</p>
-                    </div>
-                    <span class="licencas-card-arrow" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" focusable="false">
-                            <path d="M5 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
-                </div>
-            </a>
-        </div>
+    <section class="license-options" aria-label="Opções de licenças">
+        <a class="glass-card license-option-card license-option-card--projects" href="{% url 'core:licencas_projetos' %}">
+            <span class="license-option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <rect x="3" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                    <rect x="14" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+            </span>
+            <span class="license-option-badge">Catálogo de projetos</span>
+            <span class="license-option-content">
+                <span class="license-option-title">Visualizar dados dos projetos</span>
+                <span class="license-option-description">Conheça a finalidade de cada sistema, seus recursos e a opção de licenciamento disponível.</span>
+            </span>
+            <span class="license-option-link">Ver projetos <span aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="glass-card license-option-card license-option-card--license" href="{% url 'core:licenca_softwares' %}">
+            <span class="license-option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M12 3l7 3v5c0 4.6-2.9 7.9-7 10-4.1-2.1-7-5.4-7-10V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <span class="license-option-badge">Licenciamento</span>
+            <span class="license-option-content">
+                <span class="license-option-title">Gerar licença dos softwares</span>
+                <span class="license-option-description">Informe o identificador do equipamento e gere o código de licença para o sistema contratado.</span>
+            </span>
+            <span class="license-option-link">Gerar licença <span aria-hidden="true">→</span></span>
+        </a>
     </section>
 {% endblock %}

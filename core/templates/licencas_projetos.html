@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Projetos licenciados | André Luzardo Porto{% endblock %}
+
+{% block content %}
+    <section class="license-page-header">
+        <a class="license-back-link" href="{% url 'core:licencas' %}">← Voltar para licenças</a>
+        <p class="eyebrow">Catálogo de soluções</p>
+        <h1>Projetos licenciados</h1>
+        <p>Visualize os sistemas disponíveis e escolha uma opção para gerar a licença do projeto.</p>
+    </section>
+
+    <section class="license-project-grid" aria-label="Projetos disponíveis">
+        <article class="glass-card license-project-card">
+            <div class="license-project-card-top">
+                <span class="license-project-mark license-project-mark--office" aria-hidden="true">GO</span>
+                <span class="license-option-badge">Licença disponível</span>
+            </div>
+            <h2>Gestão Oficina</h2>
+            <p>Organize ordens de serviço, clientes e a rotina da sua oficina em um sistema prático para o dia a dia.</p>
+            <a class="btn-cta license-project-action" href="{% url 'core:licenca_softwares' %}">Gerar licença <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="glass-card license-project-card">
+            <div class="license-project-card-top">
+                <span class="license-project-mark license-project-mark--salon" aria-hidden="true">GS</span>
+                <span class="license-option-badge">Licença disponível</span>
+            </div>
+            <h2>Gestão Salão Beleza</h2>
+            <p>Tenha mais controle sobre clientes, serviços e atendimentos com uma solução pensada para salões de beleza.</p>
+            <a class="btn-cta license-project-action" href="{% url 'core:licenca_gestao_salao_beleza' %}">Gerar licença <span aria-hidden="true">→</span></a>
+        </article>
+    </section>
+
+    <section class="license-project-footer glass-card">
+        <div>
+            <p class="eyebrow">Mais detalhes</p>
+            <h2>Conheça também o portfólio completo</h2>
+            <p>Veja os demais projetos, tecnologias e soluções desenvolvidas.</p>
+        </div>
+        <a class="btn-ghost" href="{% url 'core:projetos' %}">Ver portfólio <span aria-hidden="true">↗</span></a>
+    </section>
+{% endblock %}

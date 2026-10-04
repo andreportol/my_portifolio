@@ -19,6 +19,39 @@ def _decode_payload(license_key: str) -> dict:
 
 
 class LicenseGeneratorTests(TestCase):
+    def test_license_dashboard_offers_project_catalog_and_generator(self):
+        user_model = get_user_model()
+        user = user_model.objects.create_user(
+            username="license-dashboard",
+            email="license-dashboard@example.com",
+            password="password123",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("core:licencas"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Visualizar dados dos projetos")
+        self.assertContains(response, "Gerar licença dos softwares")
+        self.assertContains(response, reverse("core:licencas_projetos"))
+        self.assertContains(response, reverse("core:licenca_softwares"))
+
+    def test_license_project_catalog_lists_available_generators(self):
+        user_model = get_user_model()
+        user = user_model.objects.create_user(
+            username="license-projects",
+            email="license-projects@example.com",
+            password="password123",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("core:licencas_projetos"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gestão Oficina")
+        self.assertContains(response, "Gestão Salão Beleza")
+        self.assertContains(response, reverse("core:licenca_gestao_salao_beleza"))
+
     def test_same_machine_id_generates_the_same_key(self):
         machine_id = "1cd90f24bf0dacb7b03fcba11781052c36b622269690a445771413fd592278b3"
 

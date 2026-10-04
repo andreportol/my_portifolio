@@ -40,6 +40,10 @@ class LicencasTemplateView(ProtectedTemplateView):
     template_name = 'licencas.html'
 
 
+class LicencasProjetosTemplateView(ProtectedTemplateView):
+    template_name = 'licencas_projetos.html'
+
+
 class LicencaSoftwaresTemplateView(ProtectedTemplateView):
     template_name = 'licenca_softwares.html'
 
