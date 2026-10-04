@@ -15,6 +15,9 @@ from cobrancas.views import webhook_asaas
 @override_settings(COBRANCA_AUTOMATICA_ENABLED=True, ASAAS_API_KEY='test', ASAAS_CUSTOMER_ID='cus_test', ASAAS_WEBHOOK_TOKEN='secret', COBRANCA_PRIMEIRO_VENCIMENTO='2026-01-31', COBRANCA_VALOR_MENSAL=Decimal('200'), COBRANCA_DIAS_BLOQUEIO_GERENTE=2, COBRANCA_DIAS_BLOQUEIO_SITE=10)
 class BillingTests(TestCase):
     def setUp(self):
+        clock = patch('cobrancas.billing.timezone.localdate', return_value=date(2026, 1, 30))
+        self.hoje = clock.start()
+        self.addCleanup(clock.stop)
         self.assinatura = AssinaturaSistema.objects.create(pk=1, vencimento_atual=date(2026, 1, 31), dia_vencimento=31, valor=Decimal('200'))
         self.factory = RequestFactory()
 
@@ -41,6 +44,93 @@ class BillingTests(TestCase):
                 estado=estado_cobranca(date(2026,1,31)+timedelta(days=dias))
                 self.assertEqual(estado['gerente_bloqueado'],gerente)
                 self.assertEqual(estado['site_bloqueado'],site)
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_no_dia_do_vencimento_nao_aplica_acrescimo(self, cls):
+        self.hoje.return_value = date(2026, 1, 31)
+        client = cls.return_value
+        client.buscar_cobranca.return_value = None
+        client.criar_cobranca_pix.return_value = {'id': 'pay_1'}
+        client.obter_pix.return_value = {'payload': 'pix'}
+        assinatura, _ = garantir_cobranca_pix()
+        self.assertEqual(client.criar_cobranca_pix.call_args.kwargs['value'], Decimal('200'))
+        self.assertIsNone(assinatura.vencimento_pix)
+        client.excluir_cobranca.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_pix_vencido_e_substituido_com_cinco_porcento_uma_vez(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_antigo'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.return_value = {'customer': 'cus_test', 'billingType': 'PIX', 'status': 'OVERDUE'}
+        client.buscar_cobranca.return_value = None
+        client.criar_cobranca_pix.return_value = {'id': 'pay_novo'}
+        client.obter_pix.return_value = {'payload': 'pix_novo'}
+        assinatura, pix = garantir_cobranca_pix()
+        client.excluir_cobranca.assert_called_once_with('pay_antigo')
+        self.assertEqual(client.criar_cobranca_pix.call_args.kwargs['value'], Decimal('210.00'))
+        self.assertEqual(client.criar_cobranca_pix.call_args.kwargs['due_date'], date(2026, 2, 2))
+        self.assertEqual(assinatura.vencimento_atual, date(2026, 1, 31))
+        self.assertEqual(pix['payload'], 'pix_novo')
+        garantir_cobranca_pix()
+        client.criar_cobranca_pix.assert_called_once()
+        self.hoje.return_value = date(2026, 2, 3)
+        client.criar_cobranca_pix.return_value = {'id': 'pay_terceiro'}
+        assinatura, _ = garantir_cobranca_pix()
+        self.assertEqual(assinatura.valor_pix, Decimal('210.00'))
+        self.assertEqual(client.excluir_cobranca.call_count, 2)
+        confirmar_pagamento('pay_terceiro')
+        assinatura.refresh_from_db()
+        self.assertIsNone(assinatura.vencimento_pix)
+        self.assertEqual(assinatura.valor_pix, Decimal('200.00'))
+        self.assertEqual(assinatura.vencimento_atual, date(2026, 2, 28))
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_exclusao_incerta_nao_emite_e_reconcilia_antigo_excluido(self, cls):
+        self.hoje.return_value = date(2026, 2, 1)
+        self.assinatura.asaas_payment_id = 'pay_antigo'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.return_value = {'customer': 'cus_test', 'billingType': 'PIX', 'status': 'OVERDUE'}
+        client.excluir_cobranca.side_effect = requests.Timeout()
+        with self.assertRaises(requests.Timeout):
+            garantir_cobranca_pix()
+        client.criar_cobranca_pix.assert_not_called()
+        self.assinatura.refresh_from_db()
+        self.assertEqual(self.assinatura.asaas_payment_id, 'pay_antigo')
+        client.obter_cobranca.return_value['deleted'] = True
+        client.buscar_cobranca.return_value = None
+        client.criar_cobranca_pix.return_value = {'id': 'pay_novo'}
+        client.obter_pix.return_value = {'payload': 'pix_novo'}
+        garantir_cobranca_pix()
+        client.criar_cobranca_pix.assert_called_once()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_pagamento_confirmado_antes_da_renovacao_nao_e_excluido(self, cls):
+        self.hoje.return_value = date(2026, 2, 1)
+        self.assinatura.asaas_payment_id = 'pay_pago'
+        self.assinatura.save()
+        cls.return_value.obter_cobranca.return_value = {'customer': 'cus_test', 'billingType': 'PIX', 'status': 'RECEIVED'}
+        assinatura, pix = garantir_cobranca_pix()
+        self.assertIsNone(pix)
+        self.assertEqual(assinatura.vencimento_atual, date(2026, 2, 28))
+        cls.return_value.excluir_cobranca.assert_not_called()
+        cls.return_value.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_primeira_emissao_em_atraso_reconcilia_timeout_pelo_valor_com_acrescimo(self, cls):
+        self.hoje.return_value = date(2026, 2, 1)
+        client = cls.return_value
+        client.buscar_cobranca.side_effect = [None, {'id': 'pay_novo', 'value': 210, 'status': 'PENDING'}]
+        client.criar_cobranca_pix.side_effect = requests.Timeout()
+        client.obter_pix.return_value = {'payload': 'pix_novo'}
+        with self.assertRaises(requests.Timeout):
+            garantir_cobranca_pix()
+        assinatura, _ = garantir_cobranca_pix()
+        self.assertEqual(assinatura.valor_pix, Decimal('210.00'))
+        client.criar_cobranca_pix.assert_called_once()
+        self.assertEqual(client.buscar_cobranca.call_args.args[1], 'marmitaria-adriana-2026-01-31-atraso-2026-02-01')
 
     def test_webhook_falhou_pode_ser_reenviado(self):
         self.assinatura.asaas_payment_id='pay_1'

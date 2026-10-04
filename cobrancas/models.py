@@ -22,6 +22,7 @@ class AssinaturaSistema(TimeStampedModel):
     asaas_payment_id = models.CharField(max_length=80, blank=True)
     pix_copia_cola = models.TextField(blank=True)
     pix_expira_em = models.DateTimeField(null=True, blank=True)
+    vencimento_pix = models.DateField(null=True, blank=True, editable=False)
     lembrete_enviado_em = models.DateTimeField(null=True, blank=True)
     pago_em = models.DateTimeField(null=True, blank=True)
 
@@ -35,6 +36,19 @@ class AssinaturaSistema(TimeStampedModel):
     @property
     def esta_pago(self):
         return bool(self.pago_em)
+
+    @property
+    def valor_pix(self):
+        if self.vencimento_pix:
+            return (self.valor * Decimal('1.05')).quantize(Decimal('0.01'), rounding='ROUND_HALF_UP')
+        return self.valor
+
+    @property
+    def referencia_cobranca(self):
+        referencia = f'marmitaria-adriana-{self.vencimento_atual.isoformat()}'
+        if self.vencimento_pix:
+            referencia += f'-atraso-{self.vencimento_pix.isoformat()}'
+        return referencia
 
 
 class EventoWebhookAsaas(models.Model):

@@ -94,6 +94,16 @@ A reserva `emissao_pendente` é persistida antes do POST. Após resposta incerta
 
 A integração emite mensalidades avulsas via `/payments`, sem criar `/subscriptions`. O cliente paga o Pix manualmente.
 
+### Pix após o vencimento
+
+A partir do dia seguinte ao vencimento, a consulta do Pix (ou o processamento agendado) verifica a cobrança antiga no Asaas. Se já estiver paga, confirma o pagamento sem substituir. Se estiver pendente ou vencida, exclui a cobrança antiga no Asaas antes de emitir outra. Uma exclusão incerta interrompe a emissão; a próxima tentativa consulta novamente o estado remoto.
+
+O novo Pix vence na data de emissão e inclui acréscimo único de 5% sobre o valor mensal, arredondado para centavos: R$ 200,00 → R$ 210,00. Se não for pago nesse dia, a próxima consulta em outro dia substitui novamente o Pix, mantendo R$ 210,00, sem acumular novos acréscimos. A mensalidade base, o vencimento contratado, o dia contratado e os prazos de bloqueio permanecem iguais. O pagamento limpa o acréscimo e avança o ciclo contratado normalmente.
+
+A referência da substituição inclui o vencimento original e a data do novo Pix (`marmitaria-adriana-AAAA-MM-DD-atraso-AAAA-MM-DD`). A reserva persistida também protege a substituição contra duplicação após timeout. A API retorna `valor` como o total do Pix associado, `valor_mensal` como base, `acrescimo_atraso` e `vencimento_pix`; `vencimento_atual` continua sendo a data contratada. A marmitaria deve buscar novamente o Pix ao abrir o pagamento, sem reutilizar um código guardado de uma consulta anterior.
+
+Aplicar a migração `0003_assinaturasistema_vencimento_pix` ao publicar. Exclusão usa a [operação oficial do Asaas](https://docs.asaas.com/reference/excluir-cobranca).
+
 Referências oficiais: [Criar cobrança](https://docs.asaas.com/reference/criar-nova-cobranca), [Eventos de cobrança](https://docs.asaas.com/docs/webhook-para-cobrancas), [Sandbox](https://docs.asaas.com/docs/sandbox).
 
 ## Edição pela página do projeto

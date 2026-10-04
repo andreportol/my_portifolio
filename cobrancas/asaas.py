@@ -66,6 +66,15 @@ class AsaasClient:
     def obter_pix(self, payment_id):
         return self._request("GET", f"/payments/{payment_id}/pixQrCode")
 
+    def obter_cobranca(self, payment_id):
+        return self._request("GET", f"/payments/{payment_id}")
+
+    def excluir_cobranca(self, payment_id):
+        resultado = self._request("DELETE", f"/payments/{payment_id}")
+        if resultado.get('deleted') is not True:
+            raise AsaasError('O Asaas não confirmou a exclusão da cobrança antiga.')
+        return resultado
+
     def buscar_cobranca(self, customer_id, external_reference):
         resultado = self._request("GET", "/payments", params={
             "customer": customer_id, "externalReference": external_reference,

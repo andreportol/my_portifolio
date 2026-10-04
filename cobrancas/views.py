@@ -27,7 +27,10 @@ def _serializar(estado, pix=None):
         "assinatura": {
             "vencimento_atual": assinatura.vencimento_atual.isoformat(),
             "dia_vencimento": assinatura.dia_vencimento,
-            "valor": str(assinatura.valor),
+            "valor": str(assinatura.valor_pix),
+            "valor_mensal": str(assinatura.valor),
+            "acrescimo_atraso": str(assinatura.valor_pix - assinatura.valor),
+            "vencimento_pix": (assinatura.vencimento_pix or assinatura.vencimento_atual).isoformat(),
             "pix_copia_cola": assinatura.pix_copia_cola,
         } if assinatura else None,
         "pix": pix,
@@ -96,7 +99,7 @@ def webhook_asaas(request):
             confirmado = confirmar_pagamento(payment_id)
             if not confirmado:
                 assinatura = AssinaturaSistema.objects.filter(pk=1).first()
-                referencia = f"marmitaria-adriana-{assinatura.vencimento_atual.isoformat()}" if assinatura else None
+                referencia = assinatura.referencia_cobranca if assinatura else None
                 if referencia and payment.get("externalReference") == referencia:
                     # The event may arrive before the emission response is saved.
                     transaction.set_rollback(True)

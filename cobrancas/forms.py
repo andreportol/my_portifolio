@@ -25,6 +25,8 @@ class ProjetoCobrancaForm(forms.ModelForm):
         cleaned = super().clean()
         if self.instance.pk and (self.instance.asaas_payment_id or self.instance.emissao_pendente):
             if any(field in self.changed_data for field in ("valor", "vencimento_atual")):
+                if self.instance.vencimento_pix:
+                    raise forms.ValidationError('Há um Pix com acréscimo por atraso. Reconcilie essa cobrança no Asaas antes de alterar valor ou vencimento.')
                 if self.instance.emissao_pendente or not self.instance.asaas_payment_id:
                     raise forms.ValidationError("A emissão aguarda reconciliação no Asaas. Confira a cobrança antes de corrigir os dados.")
                 if not cleaned.get('atualizar_cobranca_asaas'):
