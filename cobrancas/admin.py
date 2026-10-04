@@ -23,7 +23,7 @@ class AdminVendedor(admin.ModelAdmin):
 @admin.register(AssinaturaSistema)
 class AssinaturaSistemaAdmin(AdminVendedor):
     list_display = ("vencimento_atual", "dia_vencimento", "valor", "asaas_payment_id", "pago_em")
-    readonly_fields = ("asaas_payment_id", "emissao_pendente", "pix_copia_cola", "pix_expira_em", "lembrete_enviado_em", "pago_em", "criado_em", "atualizado_em")
+    readonly_fields = ("nome_projeto", "status_projeto", "asaas_payment_id", "emissao_pendente", "pix_copia_cola", "pix_expira_em", "lembrete_enviado_em", "pago_em", "criado_em", "atualizado_em")
 
     def has_add_permission(self, request):
         return super().has_add_permission(request) and not AssinaturaSistema.objects.exists()

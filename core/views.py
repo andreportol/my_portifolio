@@ -11,6 +11,11 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import ContatoForms, LicencaGestaoOficinaForm, LoginForms
 from .project_catalog import PROJECTS
+from cobrancas.forms import ProjetoCobrancaForm
+from cobrancas.models import AssinaturaSistema
+from django.db import transaction
+from django.http import HttpResponseForbidden
+from decimal import Decimal
 from .services.license_service import (
     gerar_codigo_licenca_gestao_oficina,
     gerar_codigo_licenca_gestao_salao_beleza,
@@ -52,6 +57,12 @@ class LicencasProjetosTemplateView(ProtectedTemplateView):
             for slug, project in PROJECTS.items()
             if not project.get('license_url')
         }
+        assinatura = AssinaturaSistema.objects.filter(pk=1).first()
+        if assinatura and 'marmitaria_adriana' in context['projects']:
+            context['projects']['marmitaria_adriana'] = {
+                **context['projects']['marmitaria_adriana'],
+                'name': assinatura.nome_projeto, 'status': assinatura.status_projeto,
+            }
         return context
 
 
@@ -63,8 +74,35 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
         project = PROJECTS.get(self.kwargs['slug'])
         if project is None:
             raise Http404('Projeto não encontrado.')
+        project = {**project}
+        if self.kwargs['slug'] == 'marmitaria_adriana':
+            assinatura = AssinaturaSistema.objects.filter(pk=1).first()
+            if assinatura:
+                project.update(name=assinatura.nome_projeto, status=assinatura.status_projeto,
+                               billing={'amount': assinatura.valor, 'due_date': assinatura.vencimento_atual, 'payment_method': 'Pix'})
+            context['can_edit'] = self.request.user.is_superuser
+            if context['can_edit']:
+                context['form'] = kwargs.get('form') or ProjetoCobrancaForm(instance=assinatura, initial={'valor': Decimal('200.00')})
         context['project'] = project
         return context
+
+    def post(self, request, *args, **kwargs):
+        if self.kwargs['slug'] != 'marmitaria_adriana':
+            raise Http404('Projeto não editável.')
+        if not request.user.is_superuser:
+            return HttpResponseForbidden('Somente administradores podem editar a cobrança.')
+        with transaction.atomic():
+            assinatura = AssinaturaSistema.objects.select_for_update().filter(pk=1).first()
+            form = ProjetoCobrancaForm(request.POST, instance=assinatura)
+            if form.is_valid():
+                assinatura = form.save(commit=False)
+                assinatura.pk = 1
+                if 'vencimento_atual' in form.changed_data or assinatura._state.adding:
+                    assinatura.dia_vencimento = assinatura.vencimento_atual.day
+                assinatura.save()
+                messages.success(request, 'Dados do projeto salvos. Nenhuma cobrança foi emitida.')
+                return redirect('core:licenca_projeto_detalhe', slug=self.kwargs['slug'])
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class LicencaSoftwaresTemplateView(ProtectedTemplateView):

@@ -31,4 +31,22 @@
             <a class="btn-cta" href="{% url project.license_url %}">Gerar licença <span aria-hidden="true">→</span></a>
         {% endif %}
     </article>
+    {% if can_edit %}
+    <section class="glass-card mt-4">
+        <h2>Editar dados do projeto</h2>
+        <p>Salvar atualiza o cadastro da central de cobrança. A emissão depende da configuração e ativação da central.</p>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+            <div class="mb-3">
+                {{ field.label_tag }}
+                {{ field }}
+                {{ field.errors }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-cta">Salvar dados</button>
+        </form>
+    </section>
+    {% endif %}
 {% endblock %}

@@ -13,6 +13,8 @@ class TimeStampedModel(models.Model):
 
 
 class AssinaturaSistema(TimeStampedModel):
+    nome_projeto = models.CharField("nome do projeto", max_length=120, default="marmitaria_adriana")
+    status_projeto = models.CharField("status", max_length=80, default="Em implementação")
     vencimento_atual = models.DateField("vencimento atual")
     dia_vencimento = models.PositiveSmallIntegerField("dia contratado", validators=[MinValueValidator(1), MaxValueValidator(31)])
     emissao_pendente = models.BooleanField(default=False, help_text="Emissão iniciada: reconcilie com o Asaas antes de limpar este campo.")

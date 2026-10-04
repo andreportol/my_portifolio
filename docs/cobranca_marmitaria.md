@@ -95,3 +95,21 @@ A reserva `emissao_pendente` é persistida antes do POST. Após resposta incerta
 A integração emite mensalidades avulsas via `/payments`, sem criar `/subscriptions`. O cliente paga o Pix manualmente.
 
 Referências oficiais: [Criar cobrança](https://docs.asaas.com/reference/criar-nova-cobranca), [Eventos de cobrança](https://docs.asaas.com/docs/webhook-para-cobrancas), [Sandbox](https://docs.asaas.com/docs/sandbox).
+
+## Edição pela página do projeto
+
+Após publicar e executar `python manage.py migrate`, entre no portfólio como superusuário e abra `/licencas/projetos/marmitaria_adriana/`. O formulário permite salvar nome, valor, vencimento, forma de pagamento e status. O valor inicial sugerido é R$ 200,00; a única modalidade implementada é Pix. Os dados são persistidos na assinatura de ID 1, mesmo com a central desativada. Salvar não emite cobrança nem ativa a central. Status é uma informação do projeto, não uma confirmação de pagamento. A confirmação continua sendo feita pelo webhook.
+
+Valor e vencimento ficam protegidos enquanto houver `asaas_payment_id` ou `emissao_pendente`. Nome e status permanecem editáveis. O catálogo também mostra o nome e status salvos.
+
+## Primeiro teste de R$ 200,00 no Sandbox
+
+1. Mantenha `COBRANCA_AUTOMATICA_ENABLED=False` durante a configuração. Publique a alteração e aplique as migrações no banco PostgreSQL do portfólio.
+2. Cadastre os dados na página, com valor `200.00` e o vencimento escolhido. Preserve o histórico existente, caso já haja assinatura ou cobrança pendente.
+3. Nas variáveis do serviço `my_portifolio` na Railway, configure `ASAAS_API_URL=https://api-sandbox.asaas.com/v3`, a nova `ASAAS_API_KEY` do Sandbox e o `ASAAS_CUSTOMER_ID` do cliente nesse mesmo ambiente.
+4. Configure `ASAAS_WEBHOOK_TOKEN` com um segredo exclusivo (32 a 255 caracteres, sem espaços). No Asaas Sandbox, configure o webhook `https://andreporto.up.railway.app/cobrancas/asaas/webhook/` com esse mesmo token e os eventos `PAYMENT_RECEIVED` e `PAYMENT_CONFIRMED`. Não utilize a API Key como token do webhook.
+5. Configure `COBRANCA_MARMITARIA_TOKEN` e o mesmo token na aplicação da marmitaria, com a URL da central indicada neste documento. Defina `COBRANCA_GERENTE_EMAIL` se for testar o lembrete por e-mail.
+6. Ative `COBRANCA_AUTOMATICA_ENABLED=True` e faça o redeploy. Consulte a API de estado com `X-Cobranca-Token` e confira valor e vencimento. Solicite o Pix pela API autenticada `/cobrancas/api/marmitaria/pix/` para emitir ou recuperar a cobrança.
+7. Confira a cobrança de R$ 200,00 no Sandbox, simule seu recebimento e verifique o webhook: o vencimento deve avançar um mês e o Pix anterior deve ser limpo. Reenviar o mesmo evento não deve avançar outra vez.
+
+Documentação oficial: [Autenticação Sandbox](https://docs.asaas.com/docs/authentication), [Token e configuração do webhook](https://docs.asaas.com/docs/create-new-webhook-via-api).

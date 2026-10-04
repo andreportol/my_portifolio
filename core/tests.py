@@ -140,3 +140,48 @@ class LicenseGeneratorTests(TestCase):
                 license_key,
                 machine_id="ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             )
+
+
+class ProjectBillingEditingTests(TestCase):
+    def setUp(self):
+        self.url = reverse('core:licenca_projeto_detalhe', kwargs={'slug': 'marmitaria_adriana'})
+        self.user = get_user_model().objects.create_user(username='billing-editor', is_staff=True, is_superuser=True)
+        self.client.force_login(self.user)
+        self.data = {'nome_projeto': 'Marmitaria Adriana', 'valor': '200.00',
+                     'vencimento_atual': '2026-10-15', 'forma_pagamento': 'PIX',
+                     'status_projeto': 'Em teste'}
+
+    def test_save_persists_billing_without_emission(self):
+        from cobrancas.models import AssinaturaSistema
+        response = self.client.post(self.url, self.data)
+        self.assertRedirects(response, self.url)
+        assinatura = AssinaturaSistema.objects.get(pk=1)
+        self.assertEqual(str(assinatura.valor), '200.00')
+        self.assertEqual(assinatura.dia_vencimento, 15)
+        self.assertEqual(assinatura.asaas_payment_id, '')
+        page = self.client.get(self.url)
+        self.assertContains(page, 'Marmitaria Adriana')
+        self.assertContains(page, '15/10/2026')
+        self.assertContains(page, 'Em teste')
+        self.assertContains(page, 'Pix')
+
+    def test_non_staff_cannot_edit(self):
+        from cobrancas.models import AssinaturaSistema
+        self.user.is_superuser = False
+        self.user.save()
+        self.assertNotContains(self.client.get(self.url), 'Salvar dados')
+        self.assertEqual(self.client.post(self.url, self.data).status_code, 403)
+        self.assertFalse(AssinaturaSistema.objects.exists())
+
+    def test_issued_charge_prevents_changes_to_value_and_date(self):
+        from cobrancas.models import AssinaturaSistema
+        self.client.post(self.url, self.data)
+        AssinaturaSistema.objects.filter(pk=1).update(asaas_payment_id='pay_existing')
+        response = self.client.post(self.url, {**self.data, 'valor': '250.00'})
+        self.assertContains(response, 'Resolva-a no Asaas')
+        self.assertEqual(str(AssinaturaSistema.objects.get(pk=1).valor), '200.00')
+
+    def test_invalid_data_does_not_create_subscription(self):
+        from cobrancas.models import AssinaturaSistema
+        self.client.post(self.url, {**self.data, 'valor': '-1', 'vencimento_atual': 'invalid'})
+        self.assertFalse(AssinaturaSistema.objects.exists())
