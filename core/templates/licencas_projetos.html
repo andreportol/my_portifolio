@@ -7,29 +7,24 @@
         <a class="license-back-link" href="{% url 'core:licencas' %}">← Voltar para licenças</a>
         <p class="eyebrow">Catálogo de soluções</p>
         <h1>Projetos licenciados</h1>
-        <p>Visualize os sistemas disponíveis e escolha uma opção para gerar a licença do projeto.</p>
+        <p>Clique no nome de um projeto para visualizar suas informações.</p>
     </section>
 
     <section class="license-project-grid" aria-label="Projetos disponíveis">
+        {% for slug, project in projects.items %}
         <article class="glass-card license-project-card">
             <div class="license-project-card-top">
-                <span class="license-project-mark license-project-mark--office" aria-hidden="true">GO</span>
-                <span class="license-option-badge">Licença disponível</span>
+                <span class="license-project-mark" aria-hidden="true">{{ project.mark }}</span>
+                <span class="license-option-badge">{{ project.status }}</span>
             </div>
-            <h2>Gestão Oficina</h2>
-            <p>Organize ordens de serviço, clientes e a rotina da sua oficina em um sistema prático para o dia a dia.</p>
-            <a class="btn-cta license-project-action" href="{% url 'core:licenca_softwares' %}">Gerar licença <span aria-hidden="true">→</span></a>
+            <h2><a href="{% url 'core:licenca_projeto_detalhe' slug=slug %}">{{ project.name }}</a></h2>
+            {% if project.description %}<p>{{ project.description }}</p>{% endif %}
+            <a class="btn-cta license-project-action" href="{% url 'core:licenca_projeto_detalhe' slug=slug %}">Ver informações <span aria-hidden="true">→</span></a>
+            {% if project.license_url %}
+                <a class="license-back-link" href="{% url project.license_url %}">Gerar licença</a>
+            {% endif %}
         </article>
-
-        <article class="glass-card license-project-card">
-            <div class="license-project-card-top">
-                <span class="license-project-mark license-project-mark--salon" aria-hidden="true">GS</span>
-                <span class="license-option-badge">Licença disponível</span>
-            </div>
-            <h2>Gestão Salão Beleza</h2>
-            <p>Tenha mais controle sobre clientes, serviços e atendimentos com uma solução pensada para salões de beleza.</p>
-            <a class="btn-cta license-project-action" href="{% url 'core:licenca_gestao_salao_beleza' %}">Gerar licença <span aria-hidden="true">→</span></a>
-        </article>
+        {% endfor %}
     </section>
 
     <section class="license-project-footer glass-card">

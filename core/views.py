@@ -3,12 +3,14 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import ContatoForms, LicencaGestaoOficinaForm, LoginForms
+from .project_catalog import PROJECTS
 from .services.license_service import (
     gerar_codigo_licenca_gestao_oficina,
     gerar_codigo_licenca_gestao_salao_beleza,
@@ -42,6 +44,23 @@ class LicencasTemplateView(ProtectedTemplateView):
 
 class LicencasProjetosTemplateView(ProtectedTemplateView):
     template_name = 'licencas_projetos.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['projects'] = PROJECTS
+        return context
+
+
+class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
+    template_name = 'licenca_projeto_detalhe.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project = PROJECTS.get(self.kwargs['slug'])
+        if project is None:
+            raise Http404('Projeto não encontrado.')
+        context['project'] = project
+        return context
 
 
 class LicencaSoftwaresTemplateView(ProtectedTemplateView):

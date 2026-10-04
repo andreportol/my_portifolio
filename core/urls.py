@@ -9,6 +9,7 @@ from .views import (
     LicencaGestaoSalaoBelezaTemplateView,
     LicencasTemplateView,
     LicencasProjetosTemplateView,
+    LicencaProjetoDetalheTemplateView,
     PoliticaPrivacidadeTemplateView,
     ProjetosTemplateView,
     TermosServicoTemplateView,
@@ -37,6 +38,11 @@ urlpatterns = [
         'licencas/projetos/',
         LicencasProjetosTemplateView.as_view(),
         name='licencas_projetos',
+    ),
+    path(
+        'licencas/projetos/<slug:slug>/',
+        LicencaProjetoDetalheTemplateView.as_view(),
+        name='licenca_projeto_detalhe',
     ),
     path(
         'licencas/softwares/',

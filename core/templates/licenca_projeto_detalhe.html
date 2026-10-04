@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} | André Luzardo Porto{% endblock %}
+
+{% block content %}
+    <section class="license-page-header">
+        <a class="license-back-link" href="{% url 'core:licencas_projetos' %}">← Voltar para projetos</a>
+        <p class="eyebrow">Informações do projeto</p>
+        <h1>{{ project.name }}</h1>
+    </section>
+    <article class="glass-card">
+        <dl>
+            <dt>Nome do projeto</dt>
+            <dd>{{ project.name }}</dd>
+            <dt>Status</dt>
+            <dd>{{ project.status }}</dd>
+            {% if project.description %}
+                <dt>Descrição</dt>
+                <dd>{{ project.description }}</dd>
+            {% endif %}
+        </dl>
+        {% if project.license_url %}
+            <a class="btn-cta" href="{% url project.license_url %}">Gerar licença <span aria-hidden="true">→</span></a>
+        {% endif %}
+    </article>
+{% endblock %}

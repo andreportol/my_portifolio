@@ -52,6 +52,24 @@ class LicenseGeneratorTests(TestCase):
         self.assertContains(response, "Gestão Salão Beleza")
         self.assertContains(response, reverse("core:licenca_gestao_salao_beleza"))
 
+    def test_project_details_require_login(self):
+        url = reverse('core:licenca_projeto_detalhe', kwargs={'slug': 'marmitaria_adriana'})
+        response = self.client.get(url)
+        self.assertRedirects(response, reverse('core:entrar') + '?next=' + url)
+
+    def test_project_catalog_links_to_marmitaria_details(self):
+        user = get_user_model().objects.create_user(username='project-details')
+        self.client.force_login(user)
+        url = reverse('core:licenca_projeto_detalhe', kwargs={'slug': 'marmitaria_adriana'})
+        catalog = self.client.get(reverse('core:licencas_projetos'))
+        self.assertContains(catalog, url)
+        response = self.client.get(url)
+        self.assertContains(response, 'marmitaria_adriana')
+        self.assertContains(response, 'Em implementação')
+        self.assertNotContains(response, 'Gerar licença')
+        unknown = reverse('core:licenca_projeto_detalhe', kwargs={'slug': 'inexistente'})
+        self.assertEqual(self.client.get(unknown).status_code, 404)
+
     def test_same_machine_id_generates_the_same_key(self):
         machine_id = "1cd90f24bf0dacb7b03fcba11781052c36b622269690a445771413fd592278b3"
 
