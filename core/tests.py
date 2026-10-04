@@ -185,3 +185,32 @@ class ProjectBillingEditingTests(TestCase):
         from cobrancas.models import AssinaturaSistema
         self.client.post(self.url, {**self.data, 'valor': '-1', 'vencimento_atual': 'invalid'})
         self.assertFalse(AssinaturaSistema.objects.exists())
+
+
+    def test_pending_charge_can_be_corrected_with_explicit_sync(self):
+        from unittest.mock import patch
+        from cobrancas.models import AssinaturaSistema
+        self.client.post(self.url, self.data)
+        AssinaturaSistema.objects.filter(pk=1).update(asaas_payment_id='pay_existing', pix_copia_cola='old')
+        with patch('core.views.AsaasClient') as client:
+            response = self.client.post(self.url, {**self.data, 'valor': '250.00',
+                'vencimento_atual': '2026-10-20', 'atualizar_cobranca_asaas': 'on'})
+            self.assertRedirects(response, self.url)
+            client.return_value.corrigir_cobranca_pix.assert_called_once()
+        assinatura = AssinaturaSistema.objects.get(pk=1)
+        self.assertEqual(str(assinatura.valor), '250.00')
+        self.assertEqual(assinatura.dia_vencimento, 20)
+        self.assertEqual(assinatura.asaas_payment_id, 'pay_existing')
+        self.assertEqual(assinatura.pix_copia_cola, '')
+
+    def test_failed_remote_correction_keeps_local_data(self):
+        from unittest.mock import patch
+        from cobrancas.models import AssinaturaSistema
+        from cobrancas.asaas import AsaasError
+        self.client.post(self.url, self.data)
+        AssinaturaSistema.objects.filter(pk=1).update(asaas_payment_id='pay_existing')
+        with patch('core.views.AsaasClient') as client:
+            client.return_value.corrigir_cobranca_pix.side_effect = AsaasError('unavailable')
+            response = self.client.post(self.url, {**self.data, 'valor': '250.00', 'atualizar_cobranca_asaas': 'on'})
+        self.assertContains(response, 'Confira se a cobrança está pendente')
+        self.assertEqual(str(AssinaturaSistema.objects.get(pk=1).valor), '200.00')

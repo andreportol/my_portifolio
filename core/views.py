@@ -11,6 +11,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import ContatoForms, LicencaGestaoOficinaForm, LoginForms
 from .project_catalog import PROJECTS
+import requests
+from cobrancas.asaas import AsaasClient, AsaasError
 from cobrancas.forms import ProjetoCobrancaForm
 from cobrancas.models import AssinaturaSistema
 from django.db import transaction
@@ -94,13 +96,29 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
         with transaction.atomic():
             assinatura = AssinaturaSistema.objects.select_for_update().filter(pk=1).first()
             form = ProjetoCobrancaForm(request.POST, instance=assinatura)
-            if form.is_valid():
+            valido = form.is_valid()
+            corrigida = False
+            if valido and assinatura and assinatura.asaas_payment_id and any(
+                    field in form.changed_data for field in ('valor', 'vencimento_atual')):
+                try:
+                    AsaasClient().corrigir_cobranca_pix(
+                        assinatura.asaas_payment_id, form.cleaned_data['valor'],
+                        form.cleaned_data['vencimento_atual'])
+                    corrigida = True
+                except (AsaasError, requests.RequestException):
+                    form.add_error(None, 'Não foi possível confirmar a correção no Asaas. Confira se a cobrança está pendente e tente novamente.')
+                    valido = False
+            if valido:
                 assinatura = form.save(commit=False)
+                if corrigida:
+                    assinatura.pix_copia_cola = ''
+                    assinatura.pix_expira_em = None
+                    assinatura.lembrete_enviado_em = None
                 assinatura.pk = 1
                 if 'vencimento_atual' in form.changed_data or assinatura._state.adding:
                     assinatura.dia_vencimento = assinatura.vencimento_atual.day
                 assinatura.save()
-                messages.success(request, 'Dados do projeto salvos. Nenhuma cobrança foi emitida.')
+                messages.success(request, 'Dados e cobrança atualizados no Asaas.' if corrigida else 'Dados do projeto salvos. Nenhuma cobrança foi emitida.')
                 return redirect('core:licenca_projeto_detalhe', slug=self.kwargs['slug'])
         return self.render_to_response(self.get_context_data(form=form))
 

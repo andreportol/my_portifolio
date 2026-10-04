@@ -124,6 +124,50 @@ class BillingTests(TestCase):
             self.assertEqual(webhook_asaas(request).status_code,400)
         self.assertFalse(EventoWebhookAsaas.objects.exists())
 
+    @patch('cobrancas.asaas.requests.request')
+    def test_rejeicao_por_cpf_ausente_permite_nova_tentativa_apos_correcao(self, request):
+        from cobrancas.asaas import AsaasError
+        from unittest.mock import Mock
+        def resposta(status, dados):
+            response = Mock(status_code=status, ok=status == 200)
+            response.json.return_value = dados
+            return response
+        request.side_effect = [
+            resposta(200, {'data': []}),
+            resposta(400, {'errors': [{'code': 'invalid_object', 'description': 'CPF/CNPJ ausente'}]}),
+            resposta(200, {'data': []}),
+            resposta(200, {'id': 'pay_1'}),
+            resposta(200, {'payload': 'pix_1'}),
+        ]
+        with self.assertRaises(AsaasError):
+            garantir_cobranca_pix()
+        self.assinatura.refresh_from_db()
+        self.assertFalse(self.assinatura.emissao_pendente)
+        self.assertEqual(self.assinatura.asaas_payment_id, '')
+        assinatura, pix = garantir_cobranca_pix()
+        self.assertEqual(assinatura.asaas_payment_id, 'pay_1')
+        self.assertEqual(pix['payload'], 'pix_1')
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_erro_incerto_nao_libera_reserva_nem_reemite(self, cls):
+        from cobrancas.asaas import AsaasError
+        client = cls.return_value
+        client.buscar_cobranca.return_value = None
+        for erro in [requests.Timeout(), AsaasError('Erro do servidor', status_code=500, errors=[{'code': 'internal_error'}]),
+                     AsaasError('Proxy 400', status_code=400)]:
+            with self.subTest(erro=type(erro).__name__, status=getattr(erro, 'status_code', None)):
+                self.assinatura.emissao_pendente = False
+                self.assinatura.save()
+                client.criar_cobranca_pix.reset_mock()
+                client.criar_cobranca_pix.side_effect = erro
+                with self.assertRaises(type(erro)):
+                    garantir_cobranca_pix()
+                self.assinatura.refresh_from_db()
+                self.assertTrue(self.assinatura.emissao_pendente)
+                with self.assertRaises(AsaasError):
+                    garantir_cobranca_pix()
+                client.criar_cobranca_pix.assert_called_once()
+
 
 @override_settings(COBRANCA_AUTOMATICA_ENABLED=True, ASAAS_API_KEY='test',
     ASAAS_CUSTOMER_ID='cus_test', COBRANCA_MARMITARIA_TOKEN='read-token',
@@ -249,3 +293,26 @@ class ImportacaoTests(TestCase):
         with self.assertRaises(CommandError):
             call_command('importar_cobranca_marmitaria', self._arquivo(dados))
         self.assertFalse(AssinaturaSistema.objects.exists())
+
+
+@override_settings(ASAAS_CUSTOMER_ID='cus_test')
+class CorrecaoAsaasTests(TestCase):
+    def test_paid_charge_is_not_modified(self):
+        from cobrancas.asaas import AsaasClient, AsaasError
+        with patch.object(AsaasClient, '_request', return_value={
+                'customer': 'cus_test', 'billingType': 'PIX', 'status': 'RECEIVED'}) as request:
+            with self.assertRaises(AsaasError):
+                AsaasClient().corrigir_cobranca_pix('pay_test', Decimal('250'), date(2026, 10, 20))
+            self.assertEqual(request.call_count, 1)
+
+    def test_pending_charge_updates_same_id_and_reference(self):
+        from cobrancas.asaas import AsaasClient
+        with patch.object(AsaasClient, '_request', side_effect=[
+            {'customer': 'cus_test', 'billingType': 'PIX', 'status': 'PENDING'},
+            {'data': []},
+            {'id': 'pay_test', 'value': 250, 'dueDate': '2026-10-20',
+             'externalReference': 'marmitaria-adriana-2026-10-20'},
+        ]) as request:
+            AsaasClient().corrigir_cobranca_pix('pay_test', Decimal('250'), date(2026, 10, 20))
+            self.assertEqual(request.call_args.args, ('PUT', '/payments/pay_test'))
+            self.assertEqual(request.call_args.kwargs['json']['value'], 250)

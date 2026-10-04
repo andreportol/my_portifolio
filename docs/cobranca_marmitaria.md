@@ -113,3 +113,9 @@ Valor e vencimento ficam protegidos enquanto houver `asaas_payment_id` ou `emiss
 7. Confira a cobrança de R$ 200,00 no Sandbox, simule seu recebimento e verifique o webhook: o vencimento deve avançar um mês e o Pix anterior deve ser limpo. Reenviar o mesmo evento não deve avançar outra vez.
 
 Documentação oficial: [Autenticação Sandbox](https://docs.asaas.com/docs/authentication), [Token e configuração do webhook](https://docs.asaas.com/docs/create-new-webhook-via-api).
+
+## Pix recusado por cadastro incompleto
+
+O cliente pagador no Asaas precisa ter CPF ou CNPJ preenchido. Se o Asaas retornar HTTP 400 com erro `invalid_object` pedindo esse dado, corrija o cadastro do cliente no mesmo ambiente da integração (sandbox ou produção). A chave Pix dos pedidos na marmitaria não substitui o CPF/CNPJ do cadastro Asaas.
+
+Uma resposta explícita de rejeição do Asaas (HTTP 400, 401 ou 403 com lista de erros) libera a reserva de emissão no portfólio, permitindo tentar novamente após corrigir o motivo. Timeouts, erros 5xx e respostas sem confirmação de rejeição preservam a reserva e exigem reconciliação. Para reservas criadas pela versão anterior, confirme no Asaas que nenhuma cobrança foi emitida e que a tentativa anterior terminou antes de remover a reserva; não altere valor ou vencimento para contornar a falha.

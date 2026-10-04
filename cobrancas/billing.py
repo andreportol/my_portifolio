@@ -99,11 +99,21 @@ def garantir_cobranca_pix():
         assinatura.refresh_from_db()
         return assinatura, None
     if criar:
-        cobranca = client.criar_cobranca_pix(
-            customer_id=settings.ASAAS_CUSTOMER_ID, value=assinatura.valor,
-            due_date=assinatura.vencimento_atual, description=settings.COBRANCA_DESCRICAO,
-            external_reference=referencia,
-        )
+        try:
+            cobranca = client.criar_cobranca_pix(
+                customer_id=settings.ASAAS_CUSTOMER_ID, value=assinatura.valor,
+                due_date=assinatura.vencimento_atual, description=settings.COBRANCA_DESCRICAO,
+                external_reference=referencia,
+            )
+        except AsaasError as exc:
+            if exc.emissao_rejeitada:
+                # A validação recusou o POST: não existe emissão para reconciliar.
+                # Não limpar reservas de outro ciclo ou cobranças já associadas.
+                AssinaturaSistema.objects.filter(
+                    pk=assinatura.pk, vencimento_atual=assinatura.vencimento_atual,
+                    asaas_payment_id="", emissao_pendente=True,
+                ).update(emissao_pendente=False, atualizado_em=timezone.now())
+            raise
         with transaction.atomic():
             atual = AssinaturaSistema.objects.select_for_update().get(pk=assinatura.pk)
             if atual.vencimento_atual != assinatura.vencimento_atual:
