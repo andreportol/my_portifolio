@@ -16,6 +16,7 @@ PROJECTS = {
     'marmitaria_adriana': {
         'name': 'marmitaria_adriana',
         'mark': 'MA',
+        'logo': 'img/marmitaria-adriana-logo.jpeg',
         'status': 'Em implementação',
         'billing': {
             'amount': None,

@@ -1638,3 +1638,20 @@ footer {
         text-align: center;
     }
 }
+
+.license-project-logo {
+    display: block;
+    width: 96px;
+    height: 102px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 12px;
+}
+
+.license-project-card--marmitaria h2 {
+    margin-bottom: 8px;
+}
+
+.license-project-card--marmitaria .license-project-action {
+    margin-top: 0;
+}

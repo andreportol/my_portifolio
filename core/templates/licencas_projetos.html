@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Projetos licenciados | André Luzardo Porto{% endblock %}
 
@@ -12,9 +13,13 @@
 
     <section class="license-project-grid" aria-label="Projetos disponíveis">
         {% for slug, project in projects.items %}
-        <article class="glass-card license-project-card">
+        <article class="glass-card license-project-card{% if slug == 'marmitaria_adriana' %} license-project-card--marmitaria{% endif %}">
             <div class="license-project-card-top">
+                {% if project.logo %}
+                <img class="license-project-logo" src="{% static project.logo %}" alt="Logomarca da Marmitaria da Adriana" width="96" height="102">
+                {% else %}
                 <span class="license-project-mark" aria-hidden="true">{{ project.mark }}</span>
+                {% endif %}
                 <span class="license-option-badge">{{ project.status }}</span>
             </div>
             <h2><a href="{% url 'core:licenca_projeto_detalhe' slug=slug %}">{{ project.name }}</a></h2>
