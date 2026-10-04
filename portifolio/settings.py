@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # My app
     'core',
+    'cobrancas',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -202,3 +203,34 @@ CONTACT_EMAIL = read_config(
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Cobrança central da Marmitaria: credenciais pertencem ao vendedor.
+from decimal import Decimal
+
+COBRANCA_AUTOMATICA_ENABLED = read_config("COBRANCA_AUTOMATICA_ENABLED", default=False, cast=bool)
+COBRANCA_PRIMEIRO_VENCIMENTO = read_config("COBRANCA_PRIMEIRO_VENCIMENTO", default="")
+COBRANCA_VALOR_MENSAL = read_config("COBRANCA_VALOR_MENSAL", default="0.00", cast=Decimal)
+COBRANCA_DIAS_ANTECEDENCIA = read_config("COBRANCA_DIAS_ANTECEDENCIA", default=3, cast=int)
+COBRANCA_DIAS_BLOQUEIO_GERENTE = read_config("COBRANCA_DIAS_BLOQUEIO_GERENTE", default=2, cast=int)
+COBRANCA_DIAS_BLOQUEIO_SITE = read_config("COBRANCA_DIAS_BLOQUEIO_SITE", default=10, cast=int)
+COBRANCA_GERENTE_EMAIL = read_config("COBRANCA_GERENTE_EMAIL", default="")
+COBRANCA_DESCRICAO = read_config("COBRANCA_DESCRICAO", default="Mensalidade do sistema Marmitaria Adriana")
+ASAAS_API_URL = read_config("ASAAS_API_URL", default="https://api-sandbox.asaas.com/v3")
+ASAAS_API_KEY = read_config("ASAAS_API_KEY", default="")
+ASAAS_CUSTOMER_ID = read_config("ASAAS_CUSTOMER_ID", default="")
+ASAAS_WEBHOOK_TOKEN = read_config("ASAAS_WEBHOOK_TOKEN", default="")
+ASAAS_USER_AGENT = read_config("ASAAS_USER_AGENT", default="MarmitariaAdriana/1.0 (homologacao)")
+ASAAS_REQUEST_TIMEOUT = read_config("ASAAS_REQUEST_TIMEOUT", default=20, cast=int)
+
+COBRANCA_MARMITARIA_TOKEN = read_config("COBRANCA_MARMITARIA_TOKEN", default="")
+
+# Use PostgreSQL em produção para persistência e bloqueio de linha na emissão.
+DATABASE_URL = read_env("DATABASE_URL", "")
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+
+COBRANCA_TIME_ZONE = read_config("COBRANCA_TIME_ZONE", default="America/Campo_Grande")
+if COBRANCA_AUTOMATICA_ENABLED and not DEBUG and DATABASES["default"]["ENGINE"] != "django.db.backends.postgresql":
+    raise ImproperlyConfigured("A cobrança central em produção exige DATABASE_URL com PostgreSQL.")

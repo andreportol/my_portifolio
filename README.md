@@ -88,3 +88,7 @@ Se a porta `8000` estiver ocupada por outro programa no Windows, use uma porta l
 ## Notas
 - Configurações SMTP antigas não são necessárias para o formulário (Resend é usado por padrão).
 - Mensagens de sucesso/erro aparecem junto ao cartão do formulário para melhor visibilidade.
+
+## Cobrança central da Marmitaria
+
+O app `cobrancas` controla a mensalidade e o webhook Asaas no portfólio. Veja [configuração e transferência do histórico](docs/cobranca_marmitaria.md). Agende `python manage.py processar_cobranca_marmitaria` somente neste projeto.
