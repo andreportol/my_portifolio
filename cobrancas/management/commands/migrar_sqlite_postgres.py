@@ -19,6 +19,9 @@ EXCLUDES = (
     "auth.permission",
     "sessions",
     "admin.logentry",
+    # O app de cobrança central foi criado depois do SQLite legado. Essas
+    # tabelas não existem na base antiga e serão inicializadas vazias no Postgres.
+    "cobrancas",
 )
 
 
