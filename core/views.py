@@ -47,7 +47,11 @@ class LicencasProjetosTemplateView(ProtectedTemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['projects'] = PROJECTS
+        context['projects'] = {
+            slug: project
+            for slug, project in PROJECTS.items()
+            if not project.get('license_url')
+        }
         return context
 
 

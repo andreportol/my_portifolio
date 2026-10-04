@@ -9,6 +9,11 @@
         <p class="hero-lead">Cole o ID da máquina e gere a licença offline.</p>
     </section>
 
+    <nav class="d-flex flex-wrap gap-3 mb-3" aria-label="Software para licenciamento">
+        <a class="btn-ghost" href="{% url 'core:licenca_softwares' %}">Gestão Oficina</a>
+        <a class="btn-ghost" href="{% url 'core:licenca_gestao_salao_beleza' %}" aria-current="page">Gestão Salão Beleza</a>
+    </nav>
+
     <div class="glass-card">
         <form method="post" novalidate>
             {% csrf_token %}

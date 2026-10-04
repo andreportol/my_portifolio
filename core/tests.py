@@ -36,7 +36,7 @@ class LicenseGeneratorTests(TestCase):
         self.assertContains(response, reverse("core:licencas_projetos"))
         self.assertContains(response, reverse("core:licenca_softwares"))
 
-    def test_license_project_catalog_lists_available_generators(self):
+    def test_license_project_catalog_excludes_licensed_software(self):
         user_model = get_user_model()
         user = user_model.objects.create_user(
             username="license-projects",
@@ -48,9 +48,14 @@ class LicenseGeneratorTests(TestCase):
         response = self.client.get(reverse("core:licencas_projetos"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Gestão Oficina")
-        self.assertContains(response, "Gestão Salão Beleza")
-        self.assertContains(response, reverse("core:licenca_gestao_salao_beleza"))
+        self.assertNotContains(response, "Gestão Oficina")
+        self.assertNotContains(response, "Gestão Salão Beleza")
+        self.assertNotContains(response, reverse("core:licenca_gestao_salao_beleza"))
+        self.assertContains(response, "marmitaria_adriana")
+
+        licensing = self.client.get(reverse("core:licenca_softwares"))
+        self.assertEqual(licensing.status_code, 200)
+        self.assertContains(licensing, reverse("core:licenca_gestao_salao_beleza"))
 
     def test_project_details_require_login(self):
         url = reverse('core:licenca_projeto_detalhe', kwargs={'slug': 'marmitaria_adriana'})
