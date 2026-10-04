@@ -6,7 +6,16 @@
     <section class="license-page-header">
         <a class="license-back-link" href="{% url 'core:licencas_projetos' %}">← Voltar para projetos</a>
         <p class="eyebrow">Informações do projeto</p>
-        <h1>{{ project.name }}</h1>
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <h1>{{ project.name }}</h1>
+            {% if can_edit %}
+            <button type="button" class="btn-ghost" data-bs-toggle="modal" data-bs-target="#editProjectModal" aria-label="Editar dados do projeto" title="Editar dados do projeto">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m16 3 5 5M4 20l4-1L21 6a2.1 2.1 0 0 0-3-3L5 16l-1 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            {% endif %}
+        </div>
     </section>
     <article class="glass-card">
         <dl>
@@ -32,21 +41,41 @@
         {% endif %}
     </article>
     {% if can_edit %}
-    <section class="glass-card mt-4">
-        <h2>Editar dados do projeto</h2>
-        <p>Salvar atualiza o cadastro da central de cobrança. A emissão depende da configuração e ativação da central.</p>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            {% for field in form %}
-            <div class="mb-3">
-                {{ field.label_tag }}
-                {{ field }}
-                {{ field.errors }}
+    <div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="editProjectModalLabel">Editar dados do projeto</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar edição"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" id="editProjectForm">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                        {% endfor %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="editProjectForm" class="btn-cta">Salvar dados</button>
+                </div>
             </div>
-            {% endfor %}
-            <button type="submit" class="btn-cta">Salvar dados</button>
-        </form>
-    </section>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    {% if can_edit and form.errors %}
+    <script>
+        const editModal = document.getElementById('editProjectModal');
+        bootstrap.Modal.getOrCreateInstance(editModal).show();
+    </script>
     {% endif %}
 {% endblock %}
