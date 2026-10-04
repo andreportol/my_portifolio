@@ -17,5 +17,10 @@ PROJECTS = {
         'name': 'marmitaria_adriana',
         'mark': 'MA',
         'status': 'Em implementação',
+        'billing': {
+            'amount': None,
+            'due_date': None,
+            'payment_method': '',
+        },
     },
 }

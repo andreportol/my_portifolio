@@ -12,6 +12,14 @@
         <dl>
             <dt>Nome do projeto</dt>
             <dd>{{ project.name }}</dd>
+            {% if project.billing %}
+                <dt>Valor</dt>
+                <dd>{% if project.billing.amount != None %}R$ {{ project.billing.amount|floatformat:"2g" }}{% else %}Não informado{% endif %}</dd>
+                <dt>Data de vencimento</dt>
+                <dd>{{ project.billing.due_date|date:"d/m/Y"|default:"Não informado" }}</dd>
+                <dt>Forma de pagamento</dt>
+                <dd>{{ project.billing.payment_method|default:"Não informado" }}</dd>
+            {% endif %}
             <dt>Status</dt>
             <dd>{{ project.status }}</dd>
             {% if project.description %}
