@@ -91,6 +91,7 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
                                    'amount': assinatura.valor,
                                    'due_date': assinatura.vencimento_atual,
                                    'payment_method': 'Pix',
+                                   'pix_key': assinatura.pix_copia_cola,
                                    'notice_days': settings.COBRANCA_DIAS_ANTECEDENCIA,
                                    'notice_date': aviso_a_partir_de,
                                    'notice_active': hoje >= aviso_a_partir_de,

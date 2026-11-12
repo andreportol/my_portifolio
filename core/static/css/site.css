@@ -1734,6 +1734,38 @@ footer {
     font-weight: 700;
 }
 
+.project-pix-details summary {
+    width: fit-content;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.project-pix-details code {
+    display: block;
+    max-height: 128px;
+    margin-top: 9px;
+    padding: 10px 12px;
+    overflow: auto;
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 10px;
+    background: rgba(5, 12, 24, 0.58);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+.project-pix-pending {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
 .project-status-pill {
     display: inline-flex;
     align-items: center;

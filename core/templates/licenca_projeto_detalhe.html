@@ -39,6 +39,21 @@
                         <dt>Forma de pagamento</dt>
                         <dd>{{ project.billing.payment_method|default:"Não informado" }}</dd>
                     </div>
+                    {% if can_edit %}
+                    <div class="project-info-item project-info-item--pix-key">
+                        <dt>Chave Pix da cobrança</dt>
+                        <dd>
+                            {% if project.billing.pix_key %}
+                                <details class="project-pix-details">
+                                    <summary>Ver código copia e cola</summary>
+                                    <code>{{ project.billing.pix_key }}</code>
+                                </details>
+                            {% else %}
+                                <span class="project-pix-pending">Será gerada pelo Asaas ao emitir a cobrança.</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    {% endif %}
                 {% endif %}
                 <div class="project-info-item project-info-item--status">
                     <dt>Status</dt>
