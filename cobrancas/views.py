@@ -130,7 +130,7 @@ def webhook_asaas(request):
         )
         if not criado:
             return JsonResponse({"ok": True, "duplicate": True})
-        if event_type in {"PAYMENT_RECEIVED", "PAYMENT_CONFIRMED"}:
+        if event_type == "PAYMENT_RECEIVED":
             confirmado = confirmar_pagamento(payment_id)
             if not confirmado:
                 assinatura = AssinaturaSistema.objects.filter(pk=1).first()

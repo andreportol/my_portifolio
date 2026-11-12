@@ -29,18 +29,34 @@ Instale as dependências atualizadas e execute `python manage.py migrate`. Confi
 | `COBRANCA_TIME_ZONE` | `America/Campo_Grande` por padrão |
 | `COBRANCA_GERENTE_EMAIL` | E-mail do pagador; o portfólio não consulta os usuários da marmitaria |
 | `COBRANCA_DESCRICAO` | `Mensalidade do sistema Marmitaria Adriana` |
-| `ASAAS_API_URL` | Sandbox: `https://api-sandbox.asaas.com/v3` |
+| `ASAAS_API_URL` | Sandbox: `https://api-sandbox.asaas.com/v3`; produção: `https://api.asaas.com/v3` |
 | `ASAAS_API_KEY` | Credencial do vendedor, somente no portfólio |
 | `ASAAS_CUSTOMER_ID` | Cliente `cus_...` da marmitaria |
 | `ASAAS_WEBHOOK_TOKEN` | Segredo exclusivo para o webhook Asaas, diferente do token de consulta |
 | `ASAAS_REQUEST_TIMEOUT` | `20` |
 | `ASAAS_USER_AGENT` | Identificação da aplicação |
 
-Configure SMTP no portfólio (`EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, `DEFAULT_FROM_EMAIL`). Sem `COBRANCA_GERENTE_EMAIL`, a emissão ocorre, mas o lembrete não é enviado. O backend console serve apenas para testes.
+Configure SMTP no portfólio (`EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, `DEFAULT_FROM_EMAIL`). Sem `COBRANCA_GERENTE_EMAIL`, o comando agendado não emite a cobrança nem envia o lembrete. O backend console serve apenas para testes.
 
-Configure o webhook Asaas para `https://DOMINIO-PORTFOLIO/cobrancas/asaas/webhook/`, eventos `PAYMENT_RECEIVED` e `PAYMENT_CONFIRMED`, com `ASAAS_WEBHOOK_TOKEN` no header `asaas-access-token`.
+Configure o webhook Asaas para `https://DOMINIO-PORTFOLIO/cobrancas/asaas/webhook/`, evento `PAYMENT_RECEIVED`, com `ASAAS_WEBHOOK_TOKEN` no header `asaas-access-token`. `PAYMENT_CONFIRMED` é registrado, mas não libera o sistema: a documentação do Asaas informa que, em contas de pessoa física, esse estado pode ser temporário e depois terminar em estorno.
 
 Agende **no portfólio**, diariamente, `python manage.py processar_cobranca_marmitaria`. Para executar às 8h de Campo Grande/Cuiabá, use `0 12 * * *` em um agendador configurado em UTC. Use apenas um agendador. Esse comando emite/reconcilia e envia o lembrete; a consulta de Pix também pode iniciar a emissão no portfólio.
+
+## Preparação para produção no Asaas
+
+O fluxo usa a API REST oficial do Asaas (`POST /v3/payments` com `billingType=PIX`, seguido de `GET /v3/payments/{id}/pixQrCode`). O QR Code e o código copia e cola são dinâmicos por cobrança; a conta pode cadastrar uma chave Pix própria, o que é recomendado pelo Asaas, mas a mensalidade não deve guardar nem exibir uma chave bancária fixa como se fosse o código da cobrança.
+
+Antes de emitir a primeira cobrança real:
+
+1. Faça os testes no Sandbox e confirme no Asaas que não há cobrança pendente ou emissão em reconciliação.
+2. No serviço web `my_portifolio` da Railway, substitua os valores de Sandbox pelos dados da conta de **produção**: `ASAAS_API_URL=https://api.asaas.com/v3`, `ASAAS_API_KEY` de produção e `ASAAS_CUSTOMER_ID` da Marmitaria cadastrado nessa mesma conta. As contas, chaves e clientes do Sandbox e da Produção são independentes.
+3. Configure um `ASAAS_WEBHOOK_TOKEN` exclusivo, entre 32 e 255 caracteres, sem espaços e diferente da API Key. No painel da conta de produção do Asaas, configure `https://andreporto.up.railway.app/cobrancas/asaas/webhook/`, habilite o webhook, mantenha a fila não interrompida, selecione `PAYMENT_RECEIVED` e use o mesmo token. Não reutilize webhooks antigos de outros projetos.
+4. Configure SMTP e `COBRANCA_GERENTE_EMAIL`. A rotina agendada agora não cria uma cobrança se não houver e-mail de entrega.
+5. Configure um único agendador diário para executar `python manage.py processar_cobranca_marmitaria` no serviço de cobrança. O serviço web não tem `cronSchedule`; não se deve transformar o serviço web atual em um serviço cron.
+6. Confira valor, vencimento e registro de assinatura no Admin, depois habilite `COBRANCA_AUTOMATICA_ENABLED=True`. Faça a primeira emissão real manualmente em uma janela acompanhada, sem executar em paralelo o agendador.
+7. Acompanhe o ID/status da cobrança e os logs do webhook no Asaas. O sistema só avança o vencimento e libera o serviço após `PAYMENT_RECEIVED`; a criação da cobrança e `PAYMENT_CONFIRMED` não contam como recebimento final.
+
+Não troque a URL para produção mantendo a API Key ou o `ASAAS_CUSTOMER_ID` do Sandbox: o Asaas rejeita chaves usadas no ambiente incorreto e os registros não são compartilhados entre ambientes.
 
 ## Configuração da marmitaria
 
@@ -117,7 +133,7 @@ Valor e vencimento ficam protegidos enquanto houver `asaas_payment_id` ou `emiss
 1. Mantenha `COBRANCA_AUTOMATICA_ENABLED=False` durante a configuração. Publique a alteração e aplique as migrações no banco PostgreSQL do portfólio.
 2. Cadastre os dados na página, com valor `200.00` e o vencimento escolhido. Preserve o histórico existente, caso já haja assinatura ou cobrança pendente.
 3. Nas variáveis do serviço `my_portifolio` na Railway, configure `ASAAS_API_URL=https://api-sandbox.asaas.com/v3`, a nova `ASAAS_API_KEY` do Sandbox e o `ASAAS_CUSTOMER_ID` do cliente nesse mesmo ambiente.
-4. Configure `ASAAS_WEBHOOK_TOKEN` com um segredo exclusivo (32 a 255 caracteres, sem espaços). No Asaas Sandbox, configure o webhook `https://andreporto.up.railway.app/cobrancas/asaas/webhook/` com esse mesmo token e os eventos `PAYMENT_RECEIVED` e `PAYMENT_CONFIRMED`. Não utilize a API Key como token do webhook.
+4. Configure `ASAAS_WEBHOOK_TOKEN` com um segredo exclusivo (32 a 255 caracteres, sem espaços). No Asaas Sandbox, configure o webhook `https://andreporto.up.railway.app/cobrancas/asaas/webhook/` com esse mesmo token e o evento `PAYMENT_RECEIVED`. Não utilize a API Key como token do webhook.
 5. Configure `COBRANCA_MARMITARIA_TOKEN` e o mesmo token na aplicação da marmitaria, com a URL da central indicada neste documento. Defina `COBRANCA_GERENTE_EMAIL` se for testar o lembrete por e-mail.
 6. Ative `COBRANCA_AUTOMATICA_ENABLED=True` e faça o redeploy. Consulte a API de estado com `X-Cobranca-Token` e confira valor e vencimento. Solicite o Pix pela API autenticada `/cobrancas/api/marmitaria/pix/` para emitir ou recuperar a cobrança.
 7. Confira a cobrança de R$ 200,00 no Sandbox, simule seu recebimento e verifique o webhook: o vencimento deve avançar um mês e o Pix anterior deve ser limpo. Reenviar o mesmo evento não deve avançar outra vez.

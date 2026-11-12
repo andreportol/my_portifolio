@@ -85,7 +85,7 @@ def garantir_cobranca_pix():
             if existente:
                 if Decimal(str(existente["value"])) != assinatura.valor_pix:
                     raise AsaasError("Valor da cobrança existente diverge da assinatura. Reconcilie no Asaas.")
-                recebida = existente.get("status") in {"RECEIVED", "CONFIRMED"}
+                recebida = existente.get("status") == "RECEIVED"
                 assinatura.asaas_payment_id = existente["id"]
                 assinatura.emissao_pendente = False
                 assinatura.save(update_fields=["asaas_payment_id", "emissao_pendente", "atualizado_em"])
@@ -111,7 +111,7 @@ def garantir_cobranca_pix():
                 if (antiga.get('customer') != settings.ASAAS_CUSTOMER_ID
                         or antiga.get('billingType') != 'PIX'):
                     raise AsaasError('Cobrança antiga não pertence à assinatura Pix.')
-                if antiga.get('status') in {'RECEIVED', 'CONFIRMED'}:
+                if antiga.get('status') == 'RECEIVED':
                     confirmar_pagamento(atual.asaas_payment_id)
                     atual.refresh_from_db()
                     return atual, None
@@ -179,12 +179,13 @@ def preparar_e_enviar_cobranca():
     if hoje < data_lembrete:
         return "sem_acao"
 
-    assinatura, pix = garantir_cobranca_pix()
-    if not pix or assinatura.lembrete_enviado_em:
-        return "sem_acao"
     destinatarios = _emails_gerentes()
     if not destinatarios:
         return "sem_email"
+
+    assinatura, pix = garantir_cobranca_pix()
+    if not pix or assinatura.lembrete_enviado_em:
+        return "sem_acao"
 
     vencimento = assinatura.vencimento_atual.strftime("%d/%m/%Y")
     mensagem = (
