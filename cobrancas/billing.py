@@ -219,7 +219,9 @@ def confirmar_pagamento(payment_id, payment_date=None):
     assinatura.pix_copia_cola = ""
     assinatura.pix_expira_em = None
     assinatura.lembrete_enviado_em = None
+    assinatura.aviso_vencimento_exibido_em = None
+    assinatura.aviso_vencimento_exibido_superuser_em = None
     assinatura.vencimento_pix = None
     assinatura.emissao_pendente = False
-    assinatura.save(update_fields=["pago_em","vencimento_atual","asaas_payment_id","pix_copia_cola","pix_expira_em","lembrete_enviado_em","vencimento_pix","emissao_pendente","atualizado_em"])
+    assinatura.save(update_fields=["pago_em","vencimento_atual","asaas_payment_id","pix_copia_cola","pix_expira_em","lembrete_enviado_em","aviso_vencimento_exibido_em","aviso_vencimento_exibido_superuser_em","vencimento_pix","emissao_pendente","atualizado_em"])
     return True

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ project.name }} | André Luzardo Porto{% endblock %}
 
@@ -17,53 +18,107 @@
             {% endif %}
         </div>
     </section>
-    <article class="glass-card">
-        <dl>
-            <dt>Nome do projeto</dt>
-            <dd>{{ project.name }}</dd>
-            {% if project.billing %}
-                <dt>Valor</dt>
-                <dd>{% if project.billing.amount != None %}R$ {{ project.billing.amount|floatformat:"2g" }}{% else %}Não informado{% endif %}</dd>
-                <dt>Data de vencimento</dt>
-                <dd>{{ project.billing.due_date|date:"d/m/Y"|default:"Não informado" }}</dd>
-                <dt>Forma de pagamento</dt>
-                <dd>{{ project.billing.payment_method|default:"Não informado" }}</dd>
+    <article class="project-info-card{% if project.billing %} project-info-card--marmitaria{% endif %}">
+        <div class="project-info-content">
+            <p class="project-info-kicker">Resumo do projeto</p>
+            <dl class="project-info-list">
+                <div class="project-info-item project-info-item--name">
+                    <dt>Nome do projeto</dt>
+                    <dd>{{ project.name }}</dd>
+                </div>
+                {% if project.billing %}
+                    <div class="project-info-item project-info-item--amount">
+                        <dt>Valor</dt>
+                        <dd>{% if project.billing.amount != None %}R$ {{ project.billing.amount|floatformat:"2g" }}{% else %}Não informado{% endif %}</dd>
+                    </div>
+                    <div class="project-info-item">
+                        <dt>Data de vencimento</dt>
+                        <dd>{{ project.billing.due_date|date:"d/m/Y"|default:"Não informado" }}</dd>
+                    </div>
+                    <div class="project-info-item">
+                        <dt>Forma de pagamento</dt>
+                        <dd>{{ project.billing.payment_method|default:"Não informado" }}</dd>
+                    </div>
+                {% endif %}
+                <div class="project-info-item project-info-item--status">
+                    <dt>Status</dt>
+                    <dd><span class="project-status-pill"><span aria-hidden="true"></span>{{ project.status }}</span></dd>
+                </div>
+                    <div class="project-info-item project-info-item--notice">
+                        <dt>Aviso de vencimento no painel</dt>
+                        <dd>
+                            {% if project.billing.notice_shown_at %}
+                                Primeira exibição no painel: {{ project.billing.notice_shown_at|date:"d/m/Y, H:i" }}.
+                            {% else %}
+                                Ainda não exibido. A mensagem começa a aparecer em {{ project.billing.notice_date|date:"d/m/Y" }}, {{ project.billing.notice_days }} dias antes do vencimento.
+                            {% endif %}
+                            {% if project.billing.notice_superuser_shown_at %}
+                                <br>Exibido ao superusuário em {{ project.billing.notice_superuser_shown_at|date:"d/m/Y, H:i" }}.
+                            {% else %}
+                                <br>Ainda não registrado como exibido ao superusuário.
+                            {% endif %}
+                        </dd>
+                    </div>
+                {% if project.description %}
+                    <div class="project-info-item project-info-item--description">
+                        <dt>Descrição</dt>
+                        <dd>{{ project.description }}</dd>
+                    </div>
+                {% endif %}
+            </dl>
+            {% if project.license_url %}
+                <a class="btn-cta" href="{% url project.license_url %}">Gerar licença <span aria-hidden="true">→</span></a>
             {% endif %}
-            <dt>Status</dt>
-            <dd>{{ project.status }}</dd>
-            {% if project.description %}
-                <dt>Descrição</dt>
-                <dd>{{ project.description }}</dd>
-            {% endif %}
-        </dl>
-        {% if project.license_url %}
-            <a class="btn-cta" href="{% url project.license_url %}">Gerar licença <span aria-hidden="true">→</span></a>
+        </div>
+        {% if project.billing %}
+        <aside class="project-info-brand" aria-label="Logomarca da Marmitaria da Adriana">
+            <div class="project-info-logo-frame">
+                <img src="{% static 'img/marmitaria-adriana-logo.jpeg' %}" alt="Logomarca Marmitaria da Adriana" width="320" height="338">
+            </div>
+            <span class="project-info-brand-caption">Feito com carinho, servido com sabor</span>
+        </aside>
         {% endif %}
     </article>
     {% if can_edit %}
     <div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" style="background: var(--bg); color: var(--text); border: 1px solid var(--border);">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="editProjectModalLabel">Editar dados do projeto</h2>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar edição"></button>
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable project-edit-dialog">
+            <div class="modal-content project-edit-modal">
+                <div class="modal-header project-edit-header">
+                    <div class="project-edit-heading">
+                        <span class="project-edit-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <div>
+                            <p class="project-edit-eyebrow">Painel do projeto</p>
+                            <h2 class="modal-title" id="editProjectModalLabel">Editar dados do projeto</h2>
+                        </div>
+                    </div>
+                    <button type="button" class="project-edit-close" data-bs-dismiss="modal" aria-label="Fechar edição"><span aria-hidden="true">×</span></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body project-edit-body">
+                    <p class="project-edit-description">Atualize as informações da Marmitaria da Adriana.</p>
                     <form method="post" id="editProjectForm">
                         {% csrf_token %}
-                        {{ form.non_field_errors }}
+                        {% if form.non_field_errors %}<div class="project-edit-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
                         {% for field in form %}
-                        <div class="mb-3">
-                            {{ field.label_tag }}
-                            {{ field }}
-                            {{ field.errors }}
-                        </div>
+                            {% if field.field.widget.input_type == "checkbox" %}
+                                <div class="project-edit-check-row">
+                                    {{ field }}
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                </div>
+                            {% else %}
+                                <div class="project-edit-field">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                </div>
+                            {% endif %}
+                            {% if field.errors %}<div class="project-edit-errors" role="alert">{{ field.errors }}</div>{% endif %}
                         {% endfor %}
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" form="editProjectForm" class="btn-cta">Salvar dados</button>
+                <div class="modal-footer project-edit-footer">
+                    <button type="button" class="project-edit-cancel" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="editProjectForm" class="project-edit-save"><span>Salvar alterações</span><span aria-hidden="true">→</span></button>
                 </div>
             </div>
         </div>

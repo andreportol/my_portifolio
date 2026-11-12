@@ -1,10 +1,12 @@
 import hmac
+import json
 import logging
 
 import requests
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
@@ -31,6 +33,8 @@ def _serializar(estado, pix=None):
             "valor_mensal": str(assinatura.valor),
             "acrescimo_atraso": str(assinatura.valor_pix - assinatura.valor),
             "vencimento_pix": (assinatura.vencimento_pix or assinatura.vencimento_atual).isoformat(),
+            "aviso_vencimento_exibido_em": assinatura.aviso_vencimento_exibido_em.isoformat() if assinatura.aviso_vencimento_exibido_em else None,
+            "aviso_vencimento_exibido_superuser_em": assinatura.aviso_vencimento_exibido_superuser_em.isoformat() if assinatura.aviso_vencimento_exibido_superuser_em else None,
             "pix_copia_cola": assinatura.pix_copia_cola,
         } if assinatura else None,
         "pix": pix,
@@ -53,6 +57,37 @@ def estado_marmitaria(request):
             logger.exception("Falha ao consultar Pix da marmitaria no Asaas.")
             return JsonResponse({"detail": "Pix indisponível temporariamente."}, status=503)
     response = JsonResponse(_serializar(estado_cobranca(), pix))
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+@csrf_exempt
+@require_POST
+def registrar_aviso_exibido(request):
+    if not _autorizado(request):
+        return HttpResponseForbidden("Consulta não autorizada.")
+    try:
+        dados = json.loads(request.body or b"{}")
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"detail": "JSON inválido."}, status=400)
+    if not isinstance(dados, dict) or type(dados.get("superuser")) is not bool:
+        return JsonResponse({"detail": "Identificação do perfil inválida."}, status=400)
+    with transaction.atomic():
+        assinatura = AssinaturaSistema.objects.select_for_update().filter(pk=1).first()
+        if not assinatura:
+            return JsonResponse({"detail": "Assinatura indisponível."}, status=404)
+        estado = estado_cobranca()
+        if not estado["mostrar_aviso"]:
+            return JsonResponse({"detail": "O aviso ainda não está disponível."}, status=409)
+        if not assinatura.aviso_vencimento_exibido_em:
+            assinatura.aviso_vencimento_exibido_em = timezone.now()
+        if dados["superuser"] and not assinatura.aviso_vencimento_exibido_superuser_em:
+            assinatura.aviso_vencimento_exibido_superuser_em = timezone.now()
+        assinatura.save(update_fields=["aviso_vencimento_exibido_em", "aviso_vencimento_exibido_superuser_em", "atualizado_em"])
+    response = JsonResponse({
+        "aviso_vencimento_exibido_em": assinatura.aviso_vencimento_exibido_em.isoformat(),
+        "aviso_vencimento_exibido_superuser_em": assinatura.aviso_vencimento_exibido_superuser_em.isoformat() if assinatura.aviso_vencimento_exibido_superuser_em else None,
+    })
     response["Cache-Control"] = "no-store"
     return response
 

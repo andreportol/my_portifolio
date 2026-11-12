@@ -24,6 +24,8 @@ class AssinaturaSistema(TimeStampedModel):
     pix_expira_em = models.DateTimeField(null=True, blank=True)
     vencimento_pix = models.DateField(null=True, blank=True, editable=False)
     lembrete_enviado_em = models.DateTimeField(null=True, blank=True)
+    aviso_vencimento_exibido_em = models.DateTimeField(null=True, blank=True, editable=False)
+    aviso_vencimento_exibido_superuser_em = models.DateTimeField(null=True, blank=True, editable=False)
     pago_em = models.DateTimeField(null=True, blank=True)
 
     class Meta:

@@ -10,7 +10,7 @@ O vendedor controla a mensalidade no projeto `My_Portifolio`, app `cobrancas`. A
 
 No Admin do **portfólio**, somente um superusuário pode administrar a assinatura. Enquanto houver pagamento emitido ou emissão pendente, valor, vencimento e dia contratado ficam protegidos também nessa interface: mudanças exigem reconciliar a cobrança no Asaas primeiro. Eventos do webhook não podem ser editados ou excluídos no Admin.
 
-A API da marmitaria não oferece alteração: aceita apenas GET, autenticado por `X-Cobranca-Token`. O token permite consultar esta assinatura; não concede acesso ao Admin do portfólio nem à chave Asaas. Use HTTPS em produção. HTTP é aceito pelo cliente apenas em DEBUG com `localhost` ou `127.0.0.1`.
+A API usa `X-Cobranca-Token`. O estado e o Pix são consultados por GET; o painel da marmitaria também pode enviar POST para `/cobrancas/api/marmitaria/aviso-exibido/` para registrar quando o aviso de vencimento foi renderizado no painel, incluindo o primeiro horário em que foi renderizado para um superusuário. Esse registro não altera cobrança nem pagamento. O token não concede acesso ao Admin do portfólio nem à chave Asaas. Use HTTPS em produção. HTTP é aceito pelo cliente apenas em DEBUG com `localhost` ou `127.0.0.1`.
 
 ## Configuração do portfólio
 

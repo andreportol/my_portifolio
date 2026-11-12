@@ -1,4 +1,7 @@
 import logging
+from datetime import timedelta
+from zoneinfo import ZoneInfo
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -8,6 +11,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils import timezone
 
 from .forms import ContatoForms, LicencaGestaoOficinaForm, LoginForms
 from .project_catalog import PROJECTS
@@ -80,11 +84,25 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
         if self.kwargs['slug'] == 'marmitaria_adriana':
             assinatura = AssinaturaSistema.objects.filter(pk=1).first()
             if assinatura:
+                aviso_a_partir_de = assinatura.vencimento_atual - timedelta(days=settings.COBRANCA_DIAS_ANTECEDENCIA)
+                hoje = timezone.localdate(timezone=ZoneInfo(settings.COBRANCA_TIME_ZONE))
                 project.update(name=assinatura.nome_projeto, status=assinatura.status_projeto,
-                               billing={'amount': assinatura.valor, 'due_date': assinatura.vencimento_atual, 'payment_method': 'Pix'})
+                               billing={
+                                   'amount': assinatura.valor,
+                                   'due_date': assinatura.vencimento_atual,
+                                   'payment_method': 'Pix',
+                                   'notice_days': settings.COBRANCA_DIAS_ANTECEDENCIA,
+                                   'notice_date': aviso_a_partir_de,
+                                   'notice_active': hoje >= aviso_a_partir_de,
+                                   'notice_shown_at': assinatura.aviso_vencimento_exibido_em,
+                                   'notice_superuser_shown_at': assinatura.aviso_vencimento_exibido_superuser_em,
+                               })
             context['can_edit'] = self.request.user.is_superuser
             if context['can_edit']:
-                context['form'] = kwargs.get('form') or ProjetoCobrancaForm(instance=assinatura, initial={'valor': Decimal('200.00')})
+                context['form'] = kwargs.get('form') or ProjetoCobrancaForm(
+                    instance=assinatura,
+                    initial={'valor': Decimal('200.00')} if assinatura is None else None,
+                )
         context['project'] = project
         return context
 
@@ -117,6 +135,8 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
                 assinatura.pk = 1
                 if 'vencimento_atual' in form.changed_data or assinatura._state.adding:
                     assinatura.dia_vencimento = assinatura.vencimento_atual.day
+                    assinatura.aviso_vencimento_exibido_em = None
+                    assinatura.aviso_vencimento_exibido_superuser_em = None
                 assinatura.save()
                 messages.success(request, 'Dados e cobrança atualizados no Asaas.' if corrigida else 'Dados do projeto salvos. Nenhuma cobrança foi emitida.')
                 return redirect('core:licenca_projeto_detalhe', slug=self.kwargs['slug'])

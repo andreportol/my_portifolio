@@ -1655,3 +1655,425 @@ footer {
 .license-project-card--marmitaria .license-project-action {
     margin-top: 0;
 }
+
+.project-info-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.78fr);
+    align-items: center;
+    gap: clamp(24px, 5vw, 64px);
+    padding: clamp(24px, 5vw, 52px);
+    overflow: hidden;
+    color: #082c35;
+    border: 1px solid rgba(182, 244, 250, 0.72);
+    border-radius: 28px;
+    background: var(--accent);
+    box-shadow: 0 28px 72px rgba(0, 0, 0, 0.24), inset 0 1px rgba(255, 255, 255, 0.52);
+}
+
+.project-info-content {
+    min-width: 0;
+}
+
+.project-info-kicker {
+    margin: 0 0 22px;
+    color: #0b5962;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.project-info-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 26px;
+    margin: 0;
+}
+
+.project-info-item {
+    min-width: 0;
+    padding: 17px 0;
+    border-top: 1px solid rgba(8, 55, 66, 0.19);
+}
+
+.project-info-item dt {
+    margin-bottom: 7px;
+    color: #245660;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+}
+
+.project-info-item dd {
+    margin: 0;
+    color: #092f38;
+    font-size: 1rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.project-info-item--name,
+.project-info-item--status,
+.project-info-item--description,
+.project-info-item--notice {
+    grid-column: 1 / -1;
+}
+
+.project-info-item--name dd {
+    font-family: 'Space Grotesk', 'Manrope', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.01em;
+}
+
+.project-info-item--amount dd {
+    color: #064e56;
+    font-family: 'Space Grotesk', 'Manrope', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+}
+
+.project-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 13px;
+    color: #d7fff0;
+    border: 1px solid rgba(8, 63, 68, 0.34);
+    border-radius: 999px;
+    background: #12645f;
+    font-size: 0.88rem;
+}
+
+.project-status-pill span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9df2c0;
+    box-shadow: 0 0 12px rgba(157, 242, 192, 0.55);
+}
+
+.project-info-brand {
+    display: grid;
+    justify-items: center;
+    gap: 15px;
+}
+
+.project-info-logo-frame {
+    width: min(100%, 330px);
+    padding: clamp(12px, 2vw, 22px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    background: #090b0a;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3), 0 0 0 7px rgba(188, 226, 192, 0.035);
+}
+
+.project-info-logo-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+.project-info-brand-caption {
+    color: #164650;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    text-align: center;
+}
+
+.project-edit-dialog {
+    max-width: 590px;
+}
+
+.project-edit-modal {
+    overflow: hidden;
+    color: #eaf4ec;
+    border: 1px solid rgba(151, 207, 158, 0.27);
+    border-radius: 26px;
+    background:
+        radial-gradient(ellipse at 100% 0%, rgba(78, 145, 88, 0.17), transparent 40%),
+        linear-gradient(155deg, #12231a 0%, #102019 58%, #14291d 100%);
+    box-shadow: 0 35px 100px rgba(0, 0, 0, 0.52), inset 0 1px rgba(255, 255, 255, 0.06);
+    font-family: 'Manrope', sans-serif;
+}
+
+.project-edit-header {
+    align-items: flex-start;
+    padding: 25px 28px 22px;
+    border-bottom: 1px solid rgba(190, 226, 196, 0.13);
+}
+
+.project-edit-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.project-edit-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    place-items: center;
+    color: #d7f5d4;
+    border: 1px solid rgba(171, 229, 162, 0.28);
+    border-radius: 15px;
+    background: linear-gradient(145deg, rgba(104, 174, 106, 0.3), rgba(44, 97, 59, 0.28));
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.09);
+}
+
+.project-edit-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.project-edit-eyebrow {
+    margin: 0 0 4px;
+    color: #a1d3a4;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.project-edit-modal .modal-title {
+    color: #f3faf3;
+    font-family: 'Space Grotesk', 'Manrope', sans-serif;
+    font-size: clamp(1.2rem, 3vw, 1.45rem);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.project-edit-close {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    place-items: center;
+    color: #c8dccb;
+    border: 1px solid rgba(193, 224, 196, 0.16);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.045);
+    font-size: 1.55rem;
+    line-height: 1;
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.project-edit-close:hover {
+    color: white;
+    border-color: rgba(180, 230, 173, 0.4);
+    background: rgba(100, 165, 100, 0.2);
+}
+
+.project-edit-body {
+    padding: 22px 28px 9px;
+}
+
+.project-edit-description {
+    margin: 0 0 21px;
+    color: #a8bcae;
+    font-size: 0.9rem;
+}
+
+.project-edit-field {
+    margin-bottom: 18px;
+}
+
+.project-edit-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #d4e6d7;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.project-edit-modal .form-control {
+    min-height: 48px;
+    padding: 11px 14px;
+    color: #f1f8f2;
+    border: 1px solid rgba(166, 204, 171, 0.2);
+    border-radius: 13px;
+    outline: 0;
+    background-color: rgba(5, 15, 9, 0.43);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.13);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.92rem;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.project-edit-modal .form-control:focus {
+    color: #f7fff7;
+    border-color: #8ccc8b;
+    background-color: rgba(7, 19, 11, 0.64);
+    box-shadow: 0 0 0 4px rgba(123, 195, 124, 0.14);
+}
+
+.project-edit-modal select.form-control option {
+    color: #18301e;
+    background: #eff7ef;
+}
+
+.project-edit-modal input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.85) sepia(0.2) saturate(0.8);
+    cursor: pointer;
+}
+
+.project-edit-check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin: 4px 0 17px;
+    padding: 14px 15px;
+    color: #c2d4c6;
+    border: 1px solid rgba(166, 204, 171, 0.16);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.035);
+    font-size: 0.79rem;
+    line-height: 1.5;
+}
+
+.project-edit-check-row input {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    accent-color: #81c783;
+}
+
+.project-edit-check-row label {
+    cursor: pointer;
+}
+
+.project-edit-errors,
+.project-edit-errors ul {
+    margin: -10px 0 14px;
+    padding-left: 0;
+    color: #ffb8a8;
+    font-size: 0.79rem;
+    list-style: none;
+}
+
+.project-edit-errors li + li {
+    margin-top: 4px;
+}
+
+.project-edit-footer {
+    gap: 11px;
+    padding: 18px 28px 25px;
+    border-top: 0;
+}
+
+.project-edit-cancel,
+.project-edit-save {
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 11px 17px;
+    border-radius: 13px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.project-edit-cancel {
+    color: #d2e1d5;
+    border: 1px solid rgba(184, 214, 188, 0.18);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.project-edit-cancel:hover {
+    color: white;
+    border-color: rgba(184, 214, 188, 0.38);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.project-edit-save {
+    color: #102117;
+    border: 1px solid #b8e5b2;
+    background: linear-gradient(135deg, #b8e5a7, #80ca8d);
+    box-shadow: 0 8px 20px rgba(76, 157, 88, 0.18);
+}
+
+.project-edit-save:hover {
+    transform: translateY(-1px);
+    border-color: #d4f2cb;
+    background: linear-gradient(135deg, #c9efb9, #91d79d);
+    box-shadow: 0 12px 26px rgba(76, 157, 88, 0.28);
+}
+
+.modal-backdrop.show {
+    opacity: 0.78;
+    backdrop-filter: blur(5px);
+}
+
+@media (max-width: 767.98px) {
+    .project-info-card {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .project-info-brand {
+        grid-row: 1;
+    }
+
+    .project-info-logo-frame {
+        width: min(100%, 245px);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .project-info-card {
+        padding: 22px;
+        border-radius: 22px;
+    }
+
+    .project-info-list {
+        grid-template-columns: 1fr;
+    }
+
+    .project-info-item,
+    .project-info-item--name,
+    .project-info-item--status,
+    .project-info-item--description,
+    .project-info-item--notice {
+        grid-column: 1;
+    }
+
+    .project-info-item--notice dd {
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .project-edit-header {
+        padding: 21px 19px 18px;
+    }
+
+    .project-edit-heading {
+        gap: 11px;
+    }
+
+    .project-edit-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+    }
+
+    .project-edit-body {
+        padding: 19px 19px 7px;
+    }
+
+    .project-edit-footer {
+        padding: 14px 19px 20px;
+    }
+
+    .project-edit-cancel,
+    .project-edit-save {
+        flex: 1 1 auto;
+        padding-inline: 12px;
+    }
+}
