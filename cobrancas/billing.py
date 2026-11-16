@@ -157,7 +157,60 @@ def garantir_cobranca_pix():
             atual.save(update_fields=["asaas_payment_id", "emissao_pendente", "atualizado_em"])
             assinatura = atual
     payment_id = assinatura.asaas_payment_id
-    pix = client.obter_pix(payment_id)
+    try:
+        pix = client.obter_pix(payment_id)
+    except AsaasError as exc:
+        if exc.status_code != 404:
+            raise
+
+        # A migrated or stale payment ID may no longer identify the charge,
+        # even though the current cycle's charge is still present in Asaas.
+        # Reconcile by the deterministic reference before showing an error.
+        existente = client.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, assinatura.referencia_cobranca)
+        if not existente:
+            raise AsaasError(
+                "Cobrança não localizada no Asaas pela referência atual. "
+                "Confira a conta e o ambiente antes de emitir outra cobrança.",
+                status_code=404,
+            ) from exc
+        if not existente.get("id"):
+            raise AsaasError("Cobrança encontrada sem identificador válido.") from exc
+        if (
+            existente.get("customer") != settings.ASAAS_CUSTOMER_ID
+            or existente.get("billingType") != "PIX"
+            or existente.get("externalReference") != assinatura.referencia_cobranca
+        ):
+            raise AsaasError("Cobrança encontrada não corresponde à assinatura Pix.") from exc
+        if Decimal(str(existente.get("value", 0))) != assinatura.valor_pix:
+            raise AsaasError("Valor da cobrança encontrada diverge da assinatura.") from exc
+
+        if existente.get("status") == "RECEIVED":
+            with transaction.atomic():
+                atual = AssinaturaSistema.objects.select_for_update().get(pk=assinatura.pk)
+                if atual.asaas_payment_id == payment_id:
+                    atual.asaas_payment_id = existente["id"]
+                    atual.save(update_fields=["asaas_payment_id", "atualizado_em"])
+            confirmar_pagamento(existente["id"])
+            assinatura.refresh_from_db()
+            return assinatura, None
+        if existente.get("status") not in {"PENDING", "OVERDUE"}:
+            raise AsaasError("Cobrança encontrada não está disponível para Pix.") from exc
+        if existente.get("id") == payment_id:
+            raise AsaasError("Asaas localizou a cobrança, mas não forneceu seu QR Code.") from exc
+
+        with transaction.atomic():
+            atual = AssinaturaSistema.objects.select_for_update().get(pk=assinatura.pk)
+            if atual.referencia_cobranca != assinatura.referencia_cobranca:
+                return atual, None
+            if atual.asaas_payment_id == payment_id:
+                atual.asaas_payment_id = existente["id"]
+                atual.emissao_pendente = False
+                atual.save(update_fields=["asaas_payment_id", "emissao_pendente", "atualizado_em"])
+            assinatura = atual
+        if not assinatura.asaas_payment_id:
+            return assinatura, None
+        payment_id = assinatura.asaas_payment_id
+        pix = client.obter_pix(payment_id)
     # Do not restore an old payment ID if a webhook confirmed it meanwhile.
     AssinaturaSistema.objects.filter(pk=assinatura.pk, asaas_payment_id=assinatura.asaas_payment_id).update(
         pix_copia_cola=pix.get("payload", ""),
