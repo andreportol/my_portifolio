@@ -86,11 +86,38 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
             if assinatura:
                 aviso_a_partir_de = assinatura.vencimento_atual - timedelta(days=settings.COBRANCA_DIAS_ANTECEDENCIA)
                 hoje = timezone.localdate(timezone=ZoneInfo(settings.COBRANCA_TIME_ZONE))
+                if assinatura.emissao_pendente:
+                    pagamento_status = 'Emissão pendente de reconciliação'
+                    pagamento_tom = 'pending'
+                    pagamento_detalhe = 'A cobrança está sendo reconciliada com o Asaas.'
+                elif hoje > assinatura.vencimento_atual:
+                    pagamento_status = 'Em atraso'
+                    pagamento_tom = 'late'
+                    pagamento_detalhe = f'Venceu em {assinatura.vencimento_atual:%d/%m/%Y}.'
+                elif assinatura.asaas_payment_id:
+                    pagamento_status = 'Aguardando pagamento'
+                    pagamento_tom = 'pending'
+                    pagamento_detalhe = 'A cobrança Pix foi emitida e ainda não foi confirmada.'
+                elif assinatura.pago_em:
+                    pagamento_status = 'Em dia'
+                    pagamento_tom = 'paid'
+                    horario_pagamento = timezone.localtime(
+                        assinatura.pago_em,
+                        timezone=ZoneInfo(settings.COBRANCA_TIME_ZONE),
+                    )
+                    pagamento_detalhe = f'Último pagamento confirmado em {horario_pagamento:%d/%m/%Y às %H:%M}.'
+                else:
+                    pagamento_status = 'Pendente'
+                    pagamento_tom = 'pending'
+                    pagamento_detalhe = 'O pagamento desta assinatura ainda não foi confirmado.'
                 project.update(name=assinatura.nome_projeto, status=assinatura.status_projeto,
                                billing={
                                    'amount': assinatura.valor,
                                    'due_date': assinatura.vencimento_atual,
                                    'payment_method': 'Pix',
+                                   'payment_status': pagamento_status,
+                                   'payment_tone': pagamento_tom,
+                                   'payment_detail': pagamento_detalhe,
                                    'pix_key': assinatura.pix_copia_cola,
                                    'notice_days': settings.COBRANCA_DIAS_ANTECEDENCIA,
                                    'notice_date': aviso_a_partir_de,
