@@ -173,6 +173,8 @@ def garantir_cobranca_pix():
                 "Confira a conta e o ambiente antes de emitir outra cobrança.",
                 status_code=404,
             ) from exc
+        if not existente.get("id"):
+            raise AsaasError("Cobrança encontrada sem identificador válido.") from exc
         if (
             existente.get("customer") != settings.ASAAS_CUSTOMER_ID
             or existente.get("billingType") != "PIX"
