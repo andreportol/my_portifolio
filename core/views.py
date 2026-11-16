@@ -118,6 +118,7 @@ class LicencaProjetoDetalheTemplateView(ProtectedTemplateView):
                                    'payment_status': pagamento_status,
                                    'payment_tone': pagamento_tom,
                                    'payment_detail': pagamento_detalhe,
+                                   'access_released_manually': assinatura.acesso_liberado_manual,
                                    'pix_key': assinatura.pix_copia_cola,
                                    'notice_days': settings.COBRANCA_DIAS_ANTECEDENCIA,
                                    'notice_date': aviso_a_partir_de,

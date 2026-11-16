@@ -48,15 +48,17 @@ def obter_assinatura():
 def estado_cobranca(hoje=None):
     assinatura = obter_assinatura()
     if not assinatura:
-        return {"habilitada": False, "gerente_bloqueado": False, "site_bloqueado": False, "assinatura": None, "dias_para_vencer": None, "mostrar_aviso": False}
+        return {"habilitada": False, "gerente_bloqueado": False, "site_bloqueado": False, "liberado_manual": False, "assinatura": None, "dias_para_vencer": None, "mostrar_aviso": False}
 
     hoje = hoje or timezone.localdate(timezone=ZoneInfo(settings.COBRANCA_TIME_ZONE))
     vencimento = assinatura.vencimento_atual
     dias = (vencimento - hoje).days
+    liberado_manual = assinatura.acesso_liberado_manual
     return {
         "habilitada": True,
-        "gerente_bloqueado": hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_GERENTE),
-        "site_bloqueado": hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_SITE),
+        "gerente_bloqueado": not liberado_manual and hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_GERENTE),
+        "site_bloqueado": not liberado_manual and hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_SITE),
+        "liberado_manual": liberado_manual,
         "assinatura": assinatura,
         "dias_para_vencer": dias,
         "mostrar_aviso": dias <= settings.COBRANCA_DIAS_ANTECEDENCIA,

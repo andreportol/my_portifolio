@@ -124,7 +124,7 @@ Referências oficiais: [Criar cobrança](https://docs.asaas.com/reference/criar-
 
 ## Edição pela página do projeto
 
-Após publicar e executar `python manage.py migrate`, entre no portfólio como superusuário e abra `/licencas/projetos/marmitaria_adriana/`. O formulário permite salvar nome, valor, vencimento, forma de pagamento e status. O valor inicial sugerido é R$ 200,00; a única modalidade implementada é Pix. Os dados são persistidos na assinatura de ID 1, mesmo com a central desativada. Salvar não emite cobrança nem ativa a central. Status é uma informação do projeto, não uma confirmação de pagamento. A confirmação continua sendo feita pelo webhook.
+Após publicar e executar `python manage.py migrate`, entre no portfólio como superusuário e abra `/licencas/projetos/marmitaria_adriana/`. O formulário permite salvar nome, valor, vencimento, forma de pagamento, status e liberar manualmente o acesso. A liberação manual ignora os bloqueios automáticos do gerente e do site e permanece até ser desmarcada nessa página, inclusive após uma confirmação de pagamento. Use-a como contingência se houver problema no Pix; desative-a depois que o fluxo normal estiver restabelecido. O valor inicial sugerido é R$ 200,00; a única modalidade implementada é Pix. Os dados são persistidos na assinatura de ID 1, mesmo com a central desativada. Salvar não emite cobrança nem ativa a central. Status é uma informação do projeto, não uma confirmação de pagamento. A confirmação continua sendo feita pelo webhook.
 
 Valor e vencimento ficam protegidos enquanto houver `asaas_payment_id` ou `emissao_pendente`. Nome e status permanecem editáveis. O catálogo também mostra o nome e status salvos.
 

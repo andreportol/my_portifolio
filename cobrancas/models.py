@@ -18,6 +18,11 @@ class AssinaturaSistema(TimeStampedModel):
     vencimento_atual = models.DateField("vencimento atual")
     dia_vencimento = models.PositiveSmallIntegerField("dia contratado", validators=[MinValueValidator(1), MaxValueValidator(31)])
     emissao_pendente = models.BooleanField(default=False, help_text="Emissão iniciada: reconcilie com o Asaas antes de limpar este campo.")
+    acesso_liberado_manual = models.BooleanField(
+        "liberação manual de acesso",
+        default=False,
+        help_text="Ignora os bloqueios automáticos por atraso até ser desativada manualmente.",
+    )
     valor = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
     asaas_payment_id = models.CharField(max_length=80, blank=True)
     pix_copia_cola = models.TextField(blank=True)

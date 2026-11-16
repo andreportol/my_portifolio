@@ -5,13 +5,18 @@ from .models import AssinaturaSistema
 
 class ProjetoCobrancaForm(forms.ModelForm):
     forma_pagamento = forms.ChoiceField(label="Forma de pagamento", choices=[("PIX", "Pix")])
+    acesso_liberado_manual = forms.BooleanField(
+        required=False,
+        label="Liberar o acesso manualmente",
+        help_text="Libera o gerente e o site mesmo que o Pix esteja atrasado. A liberação permanece ativa até você desmarcar esta opção.",
+    )
 
     atualizar_cobranca_asaas = forms.BooleanField(
         required=False, label="Atualizar também o valor e o vencimento da cobrança pendente no Asaas")
 
     class Meta:
         model = AssinaturaSistema
-        fields = ("nome_projeto", "valor", "vencimento_atual", "status_projeto")
+        fields = ("nome_projeto", "valor", "vencimento_atual", "status_projeto", "acesso_liberado_manual")
         labels = {"nome_projeto": "Nome do projeto", "valor": "Valor (R$)", "vencimento_atual": "Data de vencimento", "status_projeto": "Status"}
         widgets = {"vencimento_atual": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"})}
 

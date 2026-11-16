@@ -27,6 +27,12 @@
                     <dd>{{ project.name }}</dd>
                 </div>
                 {% if project.billing %}
+                    {% if project.billing.access_released_manually %}
+                    <div class="project-info-item project-info-item--status">
+                        <dt>Acesso à plataforma</dt>
+                        <dd><span class="project-payment-pill project-payment-pill--paid"><span aria-hidden="true"></span>Liberado manualmente</span><small>O acesso permanece liberado até você desativar esta opção na edição do projeto.</small></dd>
+                    </div>
+                    {% endif %}
                     <div class="project-info-item project-info-item--amount">
                         <dt>Valor</dt>
                         <dd>{% if project.billing.amount != None %}R$ {{ project.billing.amount|floatformat:"2g" }}{% else %}Não informado{% endif %}</dd>
@@ -136,6 +142,7 @@
                                     {{ field }}
                                 </div>
                             {% endif %}
+                            {% if field.help_text %}<small class="project-edit-help">{{ field.help_text }}</small>{% endif %}
                             {% if field.errors %}<div class="project-edit-errors" role="alert">{{ field.errors }}</div>{% endif %}
                         {% endfor %}
                     </form>

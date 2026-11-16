@@ -2041,6 +2041,14 @@ footer {
     cursor: pointer;
 }
 
+.project-edit-help {
+    display: block;
+    margin: -10px 0 17px 28px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
 .project-edit-errors,
 .project-edit-errors ul {
     margin: -10px 0 14px;
