@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, RequestFactory, override_settings
 
 from cobrancas.billing import garantir_cobranca_pix, confirmar_pagamento, estado_cobranca
+from cobrancas.asaas import AsaasError
 from cobrancas.models import AssinaturaSistema, EventoWebhookAsaas
 from cobrancas.views import webhook_asaas
 
@@ -122,7 +123,7 @@ class BillingTests(TestCase):
     def test_primeira_emissao_em_atraso_reconcilia_timeout_pelo_valor_com_acrescimo(self, cls):
         self.hoje.return_value = date(2026, 2, 1)
         client = cls.return_value
-        client.buscar_cobranca.side_effect = [None, {'id': 'pay_novo', 'value': 210, 'status': 'PENDING'}]
+        client.buscar_cobranca.side_effect = [None, None, {'id': 'pay_novo', 'value': 210, 'status': 'PENDING'}]
         client.criar_cobranca_pix.side_effect = requests.Timeout()
         client.obter_pix.return_value = {'payload': 'pix_novo'}
         with self.assertRaises(requests.Timeout):
@@ -182,6 +183,197 @@ class BillingTests(TestCase):
         cls.return_value.buscar_cobranca.return_value=None
         with self.assertRaises(AsaasError): garantir_cobranca_pix()
         cls.return_value.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_cobranca_vencida_404_reconcilia_e_gera_novo_pix_uma_vez(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_inexistente'
+        self.assinatura.pix_copia_cola = 'pix_antigo'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.side_effect = AsaasError('Não encontrada', status_code=404)
+        client.buscar_cobranca.return_value = None
+        client.criar_cobranca_pix.return_value = {'id': 'pay_novo'}
+        client.obter_pix.return_value = {'payload': 'pix_novo'}
+
+        assinatura, pix = garantir_cobranca_pix()
+        self.assertEqual(assinatura.asaas_payment_id, 'pay_novo')
+        self.assertEqual(assinatura.vencimento_atual, date(2026, 1, 31))
+        self.assertEqual(assinatura.valor, Decimal('200'))
+        self.assertEqual(pix['payload'], 'pix_novo')
+        self.assertEqual(client.criar_cobranca_pix.call_args.kwargs['value'], Decimal('210.00'))
+        self.assertEqual(client.criar_cobranca_pix.call_args.kwargs['due_date'], date(2026, 2, 2))
+        garantir_cobranca_pix()
+        client.criar_cobranca_pix.assert_called_once()
+        client.excluir_cobranca.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_cobranca_404_antes_do_vencimento_recupera_por_referencia(self, cls):
+        self.assinatura.asaas_payment_id = 'pay_inexistente'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_pix.side_effect = [AsaasError('Não encontrada', status_code=404), {'payload': 'pix_recuperado'}]
+        client.obter_cobranca.side_effect = AsaasError('Não encontrada', status_code=404)
+        client.buscar_cobranca.return_value = {
+            'id': 'pay_recuperado', 'value': 200, 'status': 'PENDING',
+            'customer': 'cus_test', 'billingType': 'PIX',
+            'externalReference': self.assinatura.referencia_cobranca,
+        }
+        assinatura, pix = garantir_cobranca_pix()
+        self.assertEqual(assinatura.asaas_payment_id, 'pay_recuperado')
+        self.assertEqual(pix['payload'], 'pix_recuperado')
+        client.criar_cobranca_pix.assert_not_called()
+        client.excluir_cobranca.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_reconciliacao_404_encontra_cobranca_ja_paga(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_inexistente'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.side_effect = AsaasError('Não encontrada', status_code=404)
+        client.buscar_cobranca.return_value = {
+            'id': 'pay_pago', 'value': 200, 'status': 'RECEIVED',
+            'customer': 'cus_test', 'billingType': 'PIX',
+            'externalReference': self.assinatura.referencia_cobranca,
+        }
+        assinatura, pix = garantir_cobranca_pix()
+        self.assertIsNone(pix)
+        self.assertEqual(assinatura.vencimento_atual, date(2026, 2, 28))
+        self.assertEqual(assinatura.pix_copia_cola, '')
+        client.criar_cobranca_pix.assert_not_called()
+        client.obter_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_qrcode_404_com_pagamento_existente_nao_substitui_cobranca(self, cls):
+        self.assinatura.asaas_payment_id = 'pay_existente'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_pix.side_effect = AsaasError('QR indisponível', status_code=404)
+        client.obter_cobranca.return_value = {'id': 'pay_existente', 'status': 'PENDING'}
+        with self.assertRaises(AsaasError):
+            garantir_cobranca_pix()
+        self.assinatura.refresh_from_db()
+        self.assertEqual(self.assinatura.asaas_payment_id, 'pay_existente')
+        client.buscar_cobranca.assert_not_called()
+        client.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_reconciliacao_404_inconclusiva_preserva_cobranca(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_antigo'
+        self.assinatura.pix_copia_cola = 'pix_antigo'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.side_effect = AsaasError('Não encontrada', status_code=404)
+        for erro in [requests.Timeout(), AsaasError('Falha', status_code=500),
+                     AsaasError('Mais de uma cobrança encontrada')]:
+            with self.subTest(erro=str(erro)):
+                client.buscar_cobranca.side_effect = erro
+                with self.assertRaises(type(erro)):
+                    garantir_cobranca_pix()
+                self.assinatura.refresh_from_db()
+                self.assertEqual(self.assinatura.asaas_payment_id, 'pay_antigo')
+                self.assertEqual(self.assinatura.pix_copia_cola, 'pix_antigo')
+                self.assertIsNone(self.assinatura.vencimento_pix)
+        client.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_reconciliacao_404_recusa_resultado_divergente(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_antigo'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.side_effect = AsaasError('Não encontrada', status_code=404)
+        existente = {'id': 'pay_recuperado', 'value': 200, 'status': 'PENDING',
+                     'customer': 'cus_test', 'billingType': 'PIX',
+                     'externalReference': self.assinatura.referencia_cobranca}
+        for campo, valor in [('id', 'pay_antigo'), ('value', 150), ('customer', 'outro_cliente'),
+                             ('externalReference', 'outra_mensalidade'), ('deleted', True)]:
+            with self.subTest(campo=campo):
+                client.buscar_cobranca.return_value = {**existente, campo: valor}
+                with self.assertRaises(AsaasError):
+                    garantir_cobranca_pix()
+                self.assinatura.refresh_from_db()
+                self.assertEqual(self.assinatura.asaas_payment_id, 'pay_antigo')
+        client.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_emissao_atrasada_recupera_referencia_do_dia_antes_de_criar(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        client = cls.return_value
+        client.buscar_cobranca.side_effect = [None, {'id': 'pay_hoje', 'value': 210, 'status': 'PENDING'}]
+        client.obter_pix.return_value = {'payload': 'pix_hoje'}
+        assinatura, pix = garantir_cobranca_pix()
+        self.assertEqual(assinatura.asaas_payment_id, 'pay_hoje')
+        self.assertEqual(assinatura.vencimento_pix, date(2026, 2, 2))
+        self.assertEqual(pix['payload'], 'pix_hoje')
+        self.assertEqual(client.buscar_cobranca.call_args.args[1], 'marmitaria-adriana-2026-01-31-atraso-2026-02-02')
+        client.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_http_500_na_cobranca_nao_e_tratado_como_ausencia(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_antigo'
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.side_effect = AsaasError('Falha temporária', status_code=500)
+        with self.assertRaises(AsaasError):
+            garantir_cobranca_pix()
+        client.buscar_cobranca.assert_not_called()
+        client.criar_cobranca_pix.assert_not_called()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_pix_de_atraso_404_usa_data_de_hoje_sem_acumular_acrescimo(self, cls):
+        self.hoje.return_value = date(2026, 2, 3)
+        self.assinatura.asaas_payment_id = 'pay_inexistente'
+        self.assinatura.vencimento_pix = date(2026, 2, 2)
+        self.assinatura.save()
+        client = cls.return_value
+        client.obter_cobranca.side_effect = AsaasError('Não encontrada', status_code=404)
+        client.buscar_cobranca.return_value = None
+        client.criar_cobranca_pix.return_value = {'id': 'pay_hoje'}
+        client.obter_pix.return_value = {'payload': 'pix_hoje'}
+        assinatura, _ = garantir_cobranca_pix()
+        self.assertEqual(assinatura.vencimento_pix, date(2026, 2, 3))
+        self.assertEqual(assinatura.valor_pix, Decimal('210.00'))
+        self.assertEqual(client.criar_cobranca_pix.call_args.kwargs['due_date'], date(2026, 2, 3))
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_qrcode_404_apos_emissao_preserva_id_sem_emitir_novamente(self, cls):
+        client = cls.return_value
+        client.buscar_cobranca.return_value = None
+        client.criar_cobranca_pix.return_value = {'id': 'pay_emitido'}
+        client.obter_pix.side_effect = AsaasError('QR indisponível', status_code=404)
+        with self.assertRaises(AsaasError):
+            garantir_cobranca_pix()
+        self.assinatura.refresh_from_db()
+        self.assertEqual(self.assinatura.asaas_payment_id, 'pay_emitido')
+        client.criar_cobranca_pix.assert_called_once()
+        client.buscar_cobranca.assert_called_once()
+
+    @patch('cobrancas.billing.AsaasClient')
+    def test_webhook_durante_reconciliacao_nao_emite_proxima_mensalidade(self, cls):
+        self.hoje.return_value = date(2026, 2, 2)
+        self.assinatura.asaas_payment_id = 'pay_1'
+        self.assinatura.save()
+        client = cls.return_value
+        def pagamento_durante_consulta(payment_id):
+            confirmar_pagamento(payment_id)
+            raise AsaasError('Não encontrada', status_code=404)
+        client.obter_cobranca.side_effect = pagamento_durante_consulta
+        # A consulta falha dentro de uma transação; simula a confirmação de
+        # outro worker depois que essa transação já foi encerrada.
+        from cobrancas.billing import _reconciliar_cobranca_nao_encontrada
+        def confirmar_antes_de_reconciliar(erro):
+            confirmar_pagamento(erro.payment_id)
+            return _reconciliar_cobranca_nao_encontrada(erro)
+        with patch('cobrancas.billing._reconciliar_cobranca_nao_encontrada', side_effect=confirmar_antes_de_reconciliar):
+            assinatura, pix = garantir_cobranca_pix()
+        self.assertIsNone(pix)
+        self.assertEqual(assinatura.vencimento_atual, date(2026, 2, 28))
+        client.criar_cobranca_pix.assert_not_called()
+        client.buscar_cobranca.assert_not_called()
 
     def test_ano_bissexto_e_virada_do_ano(self):
         from cobrancas.billing import _proximo_mes

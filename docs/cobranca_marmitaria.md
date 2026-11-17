@@ -120,6 +120,8 @@ A referência da substituição inclui o vencimento original e a data do novo Pi
 
 Aplicar a migração `0003_assinaturasistema_vencimento_pix` ao publicar. Exclusão usa a [operação oficial do Asaas](https://docs.asaas.com/reference/excluir-cobranca).
 
+Se o ID salvo retornar HTTP 404 no Asaas, a consulta reconcilia a cobrança por cliente e referência da mensalidade. Uma cobrança encontrada com o mesmo valor é recuperada; uma cobrança já paga confirma o ciclo. Quando a busca conclui que não há cobrança, o ID inválido e o Pix antigo são removidos antes de tentar a emissão com a reserva habitual. Para mensalidades atrasadas, também é consultada a referência do Pix do dia antes de emitir. Falhas de rede, erros de autenticação, múltiplos resultados ou dados divergentes interrompem a recuperação. Um HTTP 404 apenas no QR Code, com o pagamento ainda existente, não permite substituir a cobrança.
+
 Referências oficiais: [Criar cobrança](https://docs.asaas.com/reference/criar-nova-cobranca), [Eventos de cobrança](https://docs.asaas.com/docs/webhook-para-cobrancas), [Sandbox](https://docs.asaas.com/docs/sandbox).
 
 ## Edição pela página do projeto

@@ -1,4 +1,5 @@
 import calendar
+import logging
 from datetime import date, timedelta
 from decimal import Decimal
 from zoneinfo import ZoneInfo
@@ -12,6 +13,50 @@ from django.utils.dateparse import parse_date, parse_datetime
 
 from .asaas import AsaasClient, AsaasError
 from .models import AssinaturaSistema
+
+logger = logging.getLogger(__name__)
+
+
+class _CobrancaNaoEncontrada(AsaasError):
+    def __init__(self, assinatura):
+        super().__init__("Cobrança associada não encontrada no Asaas.", status_code=404)
+        self.payment_id = assinatura.asaas_payment_id
+        self.referencia = assinatura.referencia_cobranca
+        self.assinatura_id = assinatura.pk
+
+
+def _reconciliar_cobranca_nao_encontrada(erro):
+    client = AsaasClient()
+    with transaction.atomic():
+        assinatura = AssinaturaSistema.objects.select_for_update().get(pk=erro.assinatura_id)
+        if (assinatura.asaas_payment_id != erro.payment_id
+                or assinatura.referencia_cobranca != erro.referencia):
+            return assinatura
+        existente = client.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, erro.referencia)
+        if existente:
+            if (not existente.get("id") or existente["id"] == erro.payment_id
+                    or existente.get("customer") != settings.ASAAS_CUSTOMER_ID
+                    or existente.get("billingType") != "PIX"
+                    or existente.get("externalReference") != erro.referencia
+                    or existente.get("deleted")
+                    or existente.get("status") not in {"PENDING", "OVERDUE", "RECEIVED", "CONFIRMED"}
+                    or Decimal(str(existente.get("value", 0))) != assinatura.valor_pix):
+                raise AsaasError("Não foi possível reconciliar a cobrança pelo vencimento e valor da assinatura.")
+        # Somente a listagem autenticada concluída permite substituir o ID.
+        # Timeout, erro HTTP ou duplicidade preservam a cobrança e sua reserva.
+        assinatura.asaas_payment_id = existente["id"] if existente else ""
+        assinatura.pix_copia_cola = ""
+        assinatura.pix_expira_em = None
+        assinatura.lembrete_enviado_em = None
+        assinatura.emissao_pendente = False
+        assinatura.save(update_fields=["asaas_payment_id", "pix_copia_cola", "pix_expira_em",
+            "lembrete_enviado_em", "emissao_pendente", "atualizado_em"])
+        logger.warning("Referência da mensalidade reconciliada após cobrança não encontrada no Asaas.")
+        if existente and existente["status"] in {"RECEIVED", "CONFIRMED"}:
+            confirmar_pagamento(assinatura.asaas_payment_id)
+            assinatura.refresh_from_db()
+            return assinatura
+    return None
 
 
 def _proximo_mes(data, dia_contratado=None):
@@ -48,17 +93,15 @@ def obter_assinatura():
 def estado_cobranca(hoje=None):
     assinatura = obter_assinatura()
     if not assinatura:
-        return {"habilitada": False, "gerente_bloqueado": False, "site_bloqueado": False, "liberado_manual": False, "assinatura": None, "dias_para_vencer": None, "mostrar_aviso": False}
+        return {"habilitada": False, "gerente_bloqueado": False, "site_bloqueado": False, "assinatura": None, "dias_para_vencer": None, "mostrar_aviso": False}
 
     hoje = hoje or timezone.localdate(timezone=ZoneInfo(settings.COBRANCA_TIME_ZONE))
     vencimento = assinatura.vencimento_atual
     dias = (vencimento - hoje).days
-    liberado_manual = assinatura.acesso_liberado_manual
     return {
         "habilitada": True,
-        "gerente_bloqueado": not liberado_manual and hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_GERENTE),
-        "site_bloqueado": not liberado_manual and hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_SITE),
-        "liberado_manual": liberado_manual,
+        "gerente_bloqueado": hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_GERENTE),
+        "site_bloqueado": hoje >= vencimento + timedelta(days=settings.COBRANCA_DIAS_BLOQUEIO_SITE),
         "assinatura": assinatura,
         "dias_para_vencer": dias,
         "mostrar_aviso": dias <= settings.COBRANCA_DIAS_ANTECEDENCIA,
@@ -70,6 +113,18 @@ def _emails_gerentes():
 
 
 def garantir_cobranca_pix():
+    try:
+        return _garantir_cobranca_pix()
+    except _CobrancaNaoEncontrada as exc:
+        # A transação da consulta já terminou: reconciliar antes de uma única
+        # nova tentativa, mantendo a reserva de emissão contra duplicações.
+        resolvida = _reconciliar_cobranca_nao_encontrada(exc)
+        if resolvida:
+            return resolvida, None
+        return _garantir_cobranca_pix()
+
+
+def _garantir_cobranca_pix():
     assinatura = obter_assinatura()
     if not assinatura:
         return None, None
@@ -84,19 +139,21 @@ def garantir_cobranca_pix():
         referencia = assinatura.referencia_cobranca
         if not assinatura.asaas_payment_id:
             existente = client.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, referencia)
+            if (not existente and not assinatura.emissao_pendente
+                    and hoje > (assinatura.vencimento_pix or assinatura.vencimento_atual)):
+                assinatura.vencimento_pix = hoje
+                referencia = assinatura.referencia_cobranca
+                existente = client.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, referencia)
             if existente:
                 if Decimal(str(existente["value"])) != assinatura.valor_pix:
                     raise AsaasError("Valor da cobrança existente diverge da assinatura. Reconcilie no Asaas.")
-                recebida = existente.get("status") == "RECEIVED"
+                recebida = existente.get("status") in {"RECEIVED", "CONFIRMED"}
                 assinatura.asaas_payment_id = existente["id"]
                 assinatura.emissao_pendente = False
-                assinatura.save(update_fields=["asaas_payment_id", "emissao_pendente", "atualizado_em"])
+                assinatura.save(update_fields=["asaas_payment_id", "vencimento_pix", "emissao_pendente", "atualizado_em"])
             elif assinatura.emissao_pendente:
                 raise AsaasError("Emissão aguardando reconciliação no Asaas; nova cobrança não será criada.")
             else:
-                if hoje > assinatura.vencimento_atual and not assinatura.vencimento_pix:
-                    assinatura.vencimento_pix = hoje
-                    referencia = assinatura.referencia_cobranca
                 assinatura.emissao_pendente = True
                 assinatura.save(update_fields=["vencimento_pix", "emissao_pendente", "atualizado_em"])
                 criar = True
@@ -109,11 +166,16 @@ def garantir_cobranca_pix():
         with transaction.atomic():
             atual = AssinaturaSistema.objects.select_for_update().get(pk=assinatura.pk)
             if atual.asaas_payment_id and hoje > (atual.vencimento_pix or atual.vencimento_atual):
-                antiga = client.obter_cobranca(atual.asaas_payment_id)
+                try:
+                    antiga = client.obter_cobranca(atual.asaas_payment_id)
+                except AsaasError as exc:
+                    if exc.status_code == 404:
+                        raise _CobrancaNaoEncontrada(atual) from exc
+                    raise
                 if (antiga.get('customer') != settings.ASAAS_CUSTOMER_ID
                         or antiga.get('billingType') != 'PIX'):
                     raise AsaasError('Cobrança antiga não pertence à assinatura Pix.')
-                if antiga.get('status') == 'RECEIVED':
+                if antiga.get('status') in {'RECEIVED', 'CONFIRMED'}:
                     confirmar_pagamento(atual.asaas_payment_id)
                     atual.refresh_from_db()
                     return atual, None
@@ -131,7 +193,7 @@ def garantir_cobranca_pix():
                     'lembrete_enviado_em', 'vencimento_pix', 'emissao_pendente', 'atualizado_em'])
                 renovar = True
         if renovar:
-            return garantir_cobranca_pix()
+            return _garantir_cobranca_pix()
     if criar:
         try:
             cobranca = client.criar_cobranca_pix(
@@ -162,57 +224,16 @@ def garantir_cobranca_pix():
     try:
         pix = client.obter_pix(payment_id)
     except AsaasError as exc:
-        if exc.status_code != 404:
-            raise
-
-        # A migrated or stale payment ID may no longer identify the charge,
-        # even though the current cycle's charge is still present in Asaas.
-        # Reconcile by the deterministic reference before showing an error.
-        existente = client.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, assinatura.referencia_cobranca)
-        if not existente:
-            raise AsaasError(
-                "Cobrança não localizada no Asaas pela referência atual. "
-                "Confira a conta e o ambiente antes de emitir outra cobrança.",
-                status_code=404,
-            ) from exc
-        if not existente.get("id"):
-            raise AsaasError("Cobrança encontrada sem identificador válido.") from exc
-        if (
-            existente.get("customer") != settings.ASAAS_CUSTOMER_ID
-            or existente.get("billingType") != "PIX"
-            or existente.get("externalReference") != assinatura.referencia_cobranca
-        ):
-            raise AsaasError("Cobrança encontrada não corresponde à assinatura Pix.") from exc
-        if Decimal(str(existente.get("value", 0))) != assinatura.valor_pix:
-            raise AsaasError("Valor da cobrança encontrada diverge da assinatura.") from exc
-
-        if existente.get("status") == "RECEIVED":
-            with transaction.atomic():
-                atual = AssinaturaSistema.objects.select_for_update().get(pk=assinatura.pk)
-                if atual.asaas_payment_id == payment_id:
-                    atual.asaas_payment_id = existente["id"]
-                    atual.save(update_fields=["asaas_payment_id", "atualizado_em"])
-            confirmar_pagamento(existente["id"])
-            assinatura.refresh_from_db()
-            return assinatura, None
-        if existente.get("status") not in {"PENDING", "OVERDUE"}:
-            raise AsaasError("Cobrança encontrada não está disponível para Pix.") from exc
-        if existente.get("id") == payment_id:
-            raise AsaasError("Asaas localizou a cobrança, mas não forneceu seu QR Code.") from exc
-
-        with transaction.atomic():
-            atual = AssinaturaSistema.objects.select_for_update().get(pk=assinatura.pk)
-            if atual.referencia_cobranca != assinatura.referencia_cobranca:
-                return atual, None
-            if atual.asaas_payment_id == payment_id:
-                atual.asaas_payment_id = existente["id"]
-                atual.emissao_pendente = False
-                atual.save(update_fields=["asaas_payment_id", "emissao_pendente", "atualizado_em"])
-            assinatura = atual
-        if not assinatura.asaas_payment_id:
-            return assinatura, None
-        payment_id = assinatura.asaas_payment_id
-        pix = client.obter_pix(payment_id)
+        if exc.status_code == 404 and not criar:
+            # Um QR ainda indisponível não significa que a cobrança sumiu.
+            # Confirme o 404 no pagamento antes de permitir a reconciliação.
+            try:
+                client.obter_cobranca(payment_id)
+            except AsaasError as consulta:
+                if consulta.status_code == 404:
+                    raise _CobrancaNaoEncontrada(assinatura) from consulta
+                raise
+        raise
     # Do not restore an old payment ID if a webhook confirmed it meanwhile.
     AssinaturaSistema.objects.filter(pk=assinatura.pk, asaas_payment_id=assinatura.asaas_payment_id).update(
         pix_copia_cola=pix.get("payload", ""),
@@ -234,13 +255,12 @@ def preparar_e_enviar_cobranca():
     if hoje < data_lembrete:
         return "sem_acao"
 
-    destinatarios = _emails_gerentes()
-    if not destinatarios:
-        return "sem_email"
-
     assinatura, pix = garantir_cobranca_pix()
     if not pix or assinatura.lembrete_enviado_em:
         return "sem_acao"
+    destinatarios = _emails_gerentes()
+    if not destinatarios:
+        return "sem_email"
 
     vencimento = assinatura.vencimento_atual.strftime("%d/%m/%Y")
     mensagem = (
@@ -275,9 +295,7 @@ def confirmar_pagamento(payment_id, payment_date=None):
     assinatura.pix_copia_cola = ""
     assinatura.pix_expira_em = None
     assinatura.lembrete_enviado_em = None
-    assinatura.aviso_vencimento_exibido_em = None
-    assinatura.aviso_vencimento_exibido_superuser_em = None
     assinatura.vencimento_pix = None
     assinatura.emissao_pendente = False
-    assinatura.save(update_fields=["pago_em","vencimento_atual","asaas_payment_id","pix_copia_cola","pix_expira_em","lembrete_enviado_em","aviso_vencimento_exibido_em","aviso_vencimento_exibido_superuser_em","vencimento_pix","emissao_pendente","atualizado_em"])
+    assinatura.save(update_fields=["pago_em","vencimento_atual","asaas_payment_id","pix_copia_cola","pix_expira_em","lembrete_enviado_em","vencimento_pix","emissao_pendente","atualizado_em"])
     return True
