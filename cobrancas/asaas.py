@@ -85,7 +85,7 @@ class AsaasClient:
             raise AsaasError("Mais de uma cobrança encontrada para esta mensalidade. Reconcilie no Asaas.")
         return cobrancas[0] if cobrancas else None
 
-    def corrigir_cobranca_pix(self, payment_id, value, due_date):
+    def corrigir_cobranca_pix(self, payment_id, value, due_date, external_reference=None):
         from decimal import Decimal
         cobranca = self._request("GET", f"/payments/{payment_id}")
         if (cobranca.get("customer") != settings.ASAAS_CUSTOMER_ID
@@ -93,7 +93,7 @@ class AsaasClient:
                 or cobranca.get("deleted")
                 or cobranca.get("status") not in {"PENDING", "OVERDUE"}):
             raise AsaasError("Cobrança indisponível para correção.")
-        referencia = f"marmitaria-adriana-{due_date.isoformat()}"
+        referencia = external_reference or f"marmitaria-adriana-{due_date.isoformat()}"
         existente = self.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, referencia)
         if existente and existente.get("id") != payment_id:
             raise AsaasError("Já existe outra cobrança para o vencimento informado.")

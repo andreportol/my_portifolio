@@ -31,7 +31,7 @@ def _serializar(estado, pix=None):
             "dia_vencimento": assinatura.dia_vencimento,
             "valor": str(assinatura.valor_pix),
             "valor_mensal": str(assinatura.valor),
-            "acrescimo_atraso": str(assinatura.valor_pix - assinatura.valor),
+            "acrescimo_atraso": "0.00",
             "vencimento_pix": (assinatura.vencimento_pix or assinatura.vencimento_atual).isoformat(),
             "aviso_vencimento_exibido_em": assinatura.aviso_vencimento_exibido_em.isoformat() if assinatura.aviso_vencimento_exibido_em else None,
             "aviso_vencimento_exibido_superuser_em": assinatura.aviso_vencimento_exibido_superuser_em.isoformat() if assinatura.aviso_vencimento_exibido_superuser_em else None,

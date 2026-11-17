@@ -39,8 +39,7 @@ def _reconciliar_cobranca_nao_encontrada(erro):
                     or existente.get("billingType") != "PIX"
                     or existente.get("externalReference") != erro.referencia
                     or existente.get("deleted")
-                    or existente.get("status") not in {"PENDING", "OVERDUE", "RECEIVED", "CONFIRMED"}
-                    or Decimal(str(existente.get("value", 0))) != assinatura.valor_pix):
+                    or existente.get("status") not in {"PENDING", "OVERDUE", "RECEIVED", "CONFIRMED"}):
                 raise AsaasError("Não foi possível reconciliar a cobrança pelo vencimento e valor da assinatura.")
         # Somente a listagem autenticada concluída permite substituir o ID.
         # Timeout, erro HTTP ou duplicidade preservam a cobrança e sua reserva.
@@ -145,8 +144,6 @@ def _garantir_cobranca_pix():
                 referencia = assinatura.referencia_cobranca
                 existente = client.buscar_cobranca(settings.ASAAS_CUSTOMER_ID, referencia)
             if existente:
-                if Decimal(str(existente["value"])) != assinatura.valor_pix:
-                    raise AsaasError("Valor da cobrança existente diverge da assinatura. Reconcilie no Asaas.")
                 recebida = existente.get("status") in {"RECEIVED", "CONFIRMED"}
                 assinatura.asaas_payment_id = existente["id"]
                 assinatura.emissao_pendente = False
@@ -194,12 +191,39 @@ def _garantir_cobranca_pix():
                 renovar = True
         if renovar:
             return _garantir_cobranca_pix()
+    elif assinatura.asaas_payment_id and not criar:
+        try:
+            cobranca_atual = client.obter_cobranca(assinatura.asaas_payment_id)
+        except AsaasError as exc:
+            if exc.status_code == 404:
+                raise _CobrancaNaoEncontrada(assinatura) from exc
+            raise
+        if (cobranca_atual.get("customer") != settings.ASAAS_CUSTOMER_ID
+                or cobranca_atual.get("billingType") != "PIX"
+                or cobranca_atual.get("deleted")):
+            raise AsaasError("Cobrança indisponível para conferir o valor do Pix.")
+        if cobranca_atual.get("status") in {"RECEIVED", "CONFIRMED"}:
+            confirmar_pagamento(assinatura.asaas_payment_id)
+            assinatura.refresh_from_db()
+            return assinatura, None
+        if cobranca_atual.get("status") not in {"PENDING", "OVERDUE"}:
+            raise AsaasError("Cobrança indisponível para conferir o valor do Pix.")
+        if Decimal(str(cobranca_atual.get("value", 0))) != assinatura.valor:
+            due_date = parse_date(cobranca_atual.get("dueDate"))
+            if not due_date:
+                raise AsaasError("Vencimento da cobrança inválido para corrigir o valor do Pix.")
+            client.corrigir_cobranca_pix(
+                assinatura.asaas_payment_id,
+                assinatura.valor,
+                due_date,
+                external_reference=assinatura.referencia_cobranca,
+            )
     if criar:
         try:
             cobranca = client.criar_cobranca_pix(
                 customer_id=settings.ASAAS_CUSTOMER_ID, value=assinatura.valor_pix,
                 due_date=assinatura.vencimento_pix or assinatura.vencimento_atual,
-                description=settings.COBRANCA_DESCRICAO + (' (acréscimo único de 5% por atraso)' if assinatura.vencimento_pix else ''),
+                description=settings.COBRANCA_DESCRICAO,
                 external_reference=referencia,
             )
         except AsaasError as exc:
@@ -265,8 +289,7 @@ def preparar_e_enviar_cobranca():
     vencimento = assinatura.vencimento_atual.strftime("%d/%m/%Y")
     mensagem = (
         f"Olá!\n\nA mensalidade do sistema da Marmitaria Adriana vence em {vencimento}.\n"
-        f"Valor: R$ {assinatura.valor_pix:.2f}\n"
-        + ('Inclui acréscimo único de 5% por atraso.\n' if assinatura.vencimento_pix else '') + '\n'
+        f"Valor: R$ {assinatura.valor:.2f}\n\n"
         "Pix copia e cola:\n"
         f"{assinatura.pix_copia_cola}\n\n"
         "Você também pode pagar diretamente pelo painel do gerente.\n"

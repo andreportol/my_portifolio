@@ -46,8 +46,6 @@ class AssinaturaSistema(TimeStampedModel):
 
     @property
     def valor_pix(self):
-        if self.vencimento_pix:
-            return (self.valor * Decimal('1.05')).quantize(Decimal('0.01'), rounding='ROUND_HALF_UP')
         return self.valor
 
     @property
